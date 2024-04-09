@@ -67,11 +67,6 @@ detector_values = [frame[detector_row, detector_col] for frame in diff_dose_arra
 # Convert the list to a numpy array
 detector_values = np.array(detector_values)
 
-# Perform the division operation
-detector_values = detector_values / 100  # Convert to cGy
-
-cumulative_dose = np.cumsum(detector_values)
-
 # Generate time points for each frame, 50 ms interval
 time_points = np.arange(len(cumulative_dose)) * 50
 
@@ -109,23 +104,33 @@ anim.save('cumulative_dose_animation.gif', dpi=80, writer='imagemagick')
 plt.close()  # Prevents the final frame from displaying statically
 
 # Calculate the sum and max of values at intervals of 300
-max_value = max(detector_values)
-interval_sums = []
-interval_bins = []
-for i in range(0, int(max_value), 30):
-    interval_values = [value for value in detector_values if i <= value < i + 300]
-    interval_sum = sum(interval_values)
-    interval_bin = i if interval_values else 0  # Use 0 as the max if the interval is empty
-    interval_sums.append(interval_sum)
-    interval_bins.append(interval_bin)
+def histogram_dose_rate(detector_values):
+    """
+    Calculate the sum of values at intervals of 300 for the selected detector.
 
-import seaborn as sns
+    Returns:
+    interval_sums (list): The sum of values for each interval.
+    interval_bins (list): The maximum value of each interval.
+    """
+    # Calculate the maximum value in the detector values
+    max_value = max(detector_values)
+    interval_sums = []
+    interval_bins = []
+    for i in range(0, int(max_value), 30):
+        interval_values = [value for value in detector_values if i <= value < i + 300]
+        interval_sum = sum(interval_values)
+        interval_bin = i if interval_values else 0  # Use 0 as the max if the interval is empty
+        interval_sums.append(interval_sum)
+        interval_bins.append(interval_bin)
+
+    return interval_sums, interval_bins
 
 # Convert interval_max_values to string for use as category labels
-interval_max_values_str = [str(value) for value in interval_bins]
+accumulated_dose_for_interval_bin, interval_bins = histogram_dose_rate(detector_values)
+interval_bins = [str(value) for value in interval_bins]
 
 # Create the bar plot
-sns.barplot(x=interval_max_values_str, y=interval_sums)
+sns.barplot(x=interval_bins, y=accumulated_dose_for_interval_bin)
 
 # Set the title and labels
 plt.title('Sum of Interval Values for Each Max Value')
