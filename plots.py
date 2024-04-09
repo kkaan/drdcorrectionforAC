@@ -1,11 +1,25 @@
+import matplotlib
+
+matplotlib.use('Agg')  # Set the matplotlib backend to 'Agg'
+
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.animation import FuncAnimation
-from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.colors import LinearSegmentedColormap, ListedColormap
+
 
 def create_animation(detector_arrays):
-    # Function to update each frame in the animation
+    """
+    Create an animation of the dose rate over time in the SNC Patient detector array display arrangement.
+
+    Parameters:
+    detector_arrays (list of np.array): List of 2D arrays representing the dose rate at each time point.
+
+    Returns:
+    None
+    """
+
     def update(frame):
         ax.clear()  # Clear the current axes
         # Set 0 values to background colour
@@ -45,74 +59,94 @@ def create_animation(detector_arrays):
 
     plt.close()  # Close the plot to prevent it from displaying statically
 
-def create_cumulative_dose_animation(detector_values):
-    # Generate time points for each frame, 50 ms interval
-    time_points = np.arange(len(detector_values)) * 50
 
-    # Setting up the figure for animation
+def create_cumulative_dose_animation(dose_rate_df, dose_accumulated_df, detector_index, start_frame, end_frame):
+    """
+    Create an animation of the accumulated dose over time for a specific detector,
+    with the color of the marker indicating the dose rate.
+
+    Parameters:
+    dose_rate_df (pd.DataFrame): DataFrame containing the dose rate values.
+    dose_accumulated_df (pd.DataFrame): DataFrame containing the dose values.
+    detector_index (int): The index of the detector to plot.
+    start_frame (int): The starting frame for the animation.
+    end_frame (int): The ending frame for the animation.
+
+    Returns:
+    None
+    """
+    # Select the data for the specific detector
+    dose_rate_detector = dose_rate_df.iloc[:, detector_index]
+    dose_detector = dose_accumulated_df.iloc[:, detector_index]
+
+    # Create a custom colormap based on the dose rate values
+    colors = ["darkblue", "blue", "lightblue", "green"]
+    bins = [50, 100, 150, np.inf]  # Dose rate thresholds for the colors
+    colormap = ListedColormap(colors)
+
+    # Calculate the maximum values for the x and y axes
+    x_max = dose_detector.index.max()
+    y_max = dose_detector.max()
+
+    # Set up the figure and axis for the animation
     fig, ax = plt.subplots()
-    ax.set_xlim(0, time_points[-1])  # Set x-axis to match the total duration
-    ax.set_ylim(0, np.max(detector_values) * 1.1)  # Set y-axis slightly above the max cumulative dose
-    line, = ax.plot([], [], 'ro-', lw=2)  # Initialize the line plot
 
-    # Title and labels
-    ax.set_title('Cumulative Dose Over Time for Selected Detector')
-    ax.set_xlabel('Time (ms)')
-    ax.set_ylabel('Cumulative Dose')
+    # Set the limits of the x and y axes
+    ax.set_xlim(0, x_max)
+    ax.set_ylim(0, y_max)
 
-    # Initialization function: plot the background of each frame
-    def init():
-        line.set_data([], [])
-        return (line,)
+    ax.set_title('Accumulated Dose Over Time (cGy)')
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Accumulated Dose')
 
-    # Animation update function, which is called for each frame
     def update(frame):
-        # Update the data of the line plot to extend to the current frame
-        line.set_data(time_points[:frame + 1], detector_values[:frame + 1])
-        return (line,)
+        # Calculate the color for the current frame based on the dose rate
+        color_index = np.digitize(dose_rate_detector.iloc[frame], bins) - 1
+        color = colormap.colors[color_index]
 
-    # Creating the animation
-    anim = FuncAnimation(fig, update, frames=len(detector_values), init_func=init, blit=True, interval=50)
+        # Plot the accumulated dose up to the current frame with the calculated color
+        ax.scatter(dose_detector.index[:frame + 1], dose_detector.iloc[:frame + 1], color=color)
+
+    # Create the animation
+    anim = FuncAnimation(fig, update, frames=range(start_frame, end_frame + 1))
 
     # Save the animation
-    anim.save('cumulative_dose_animation.gif', dpi=80, writer='imagemagick')
+    anim.save(f'detector_{detector_index}_accumulated_dose_animation.gif', dpi=80, writer='imagemagick')
 
-    plt.close()  # Prevents the final frame from displaying statically
-
-def create_histogram(detector_values):
-    # Calculate the sum and max of values at intervals of 300
-    def histogram_dose_rate(detector_values):
-        """
-        Calculate the sum of values at intervals of 300 for the selected detector.
-
-        Returns:
-        interval_sums (list): The sum of values for each interval.
-        interval_bins (list): The maximum value of each interval.
-        """
-        # Calculate the maximum value in the detector values
-        max_value = max(detector_values)
-        interval_sums = []
-        interval_bins = []
-        for i in range(0, int(max_value), 30):
-            interval_values = [value for value in detector_values if i <= value < i + 300]
-            interval_sum = sum(interval_values)
-            interval_bin = i if interval_values else 0  # Use 0 as the max if the interval is empty
-            interval_sums.append(interval_sum)
-            interval_bins.append(interval_bin)
-
-        return interval_sums, interval_bins
-
-    # Convert interval_max_values to string for use as category labels
-    accumulated_dose_for_interval_bin, interval_bins = histogram_dose_rate(detector_values)
-    interval_bins = [str(value) for value in interval_bins]
-
-    # Create the bar plot
-    sns.barplot(x=interval_bins, y=accumulated_dose_for_interval_bin)
-
-    # Set the title and labels
-    plt.title('Sum of Interval Values for Each Max Value')
-    plt.xlabel('Max Value of Interval')
-    plt.ylabel('Sum of Interval Values')
-
-    # Display the plot
-    plt.show()
+# def create_histogram(dose_rate_df, dose_accumulated_df):
+#     # Calculate the sum and max of values at intervals of 300
+#     def histogram_dose_rate(detector_values):
+#         """
+#         Calculate the sum of values at intervals of 300 for the selected detector.
+#
+#         Returns:
+#         interval_sums (list): The sum of values for each interval.
+#         interval_bins (list): The maximum value of each interval.
+#         """
+#         # Calculate the maximum value in the detector values
+#         max_value = max(detector_values)
+#         interval_sums = []
+#         interval_bins = []
+#         for i in range(0, int(max_value), 30):
+#             interval_values = [value for value in detector_values if i <= value < i + 300]
+#             interval_sum = sum(interval_values)
+#             interval_bin = i if interval_values else 0  # Use 0 as the max if the interval is empty
+#             interval_sums.append(interval_sum)
+#             interval_bins.append(interval_bin)
+#
+#         return interval_sums, interval_bins
+#
+#     # Convert interval_max_values to string for use as category labels
+#     accumulated_dose_for_interval_bin, interval_bins = histogram_dose_rate(detector_values)
+#     interval_bins = [str(value) for value in interval_bins]
+#
+#     # Create the bar plot
+#     sns.barplot(x=interval_bins, y=accumulated_dose_for_interval_bin)
+#
+#     # Set the title and labels
+#     plt.title('Sum of Interval Values for Each Max Value')
+#     plt.xlabel('Max Value of Interval')
+#     plt.ylabel('Sum of Interval Values')
+#
+#     # Display the plot
+#     plt.show()
