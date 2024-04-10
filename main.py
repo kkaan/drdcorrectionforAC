@@ -30,22 +30,7 @@ dose_rate_df = dose_df / time_interval # cGy/min
 # Create a list of detector arrays arranged in the SNC Patient display configuration
 # Each array represents a frame of the detector array at a specific time point
 dose_rate_arrays = detector_arrays(dose_rate_df)
-arrays = detector_arrays(dose_rate_df)
-np.savez("dose_rate_arrays.npz", *dose_rate_arrays)
 
-# dose_arrays = detector_arrays(dose_df)
-# np.savez("dose_arrays.npz", *dose_rate_arrays)
-#
-# # Load the differential dose arrays
-# data = np.load("dose_rate_arrays.npz")
-# start_row = 1000  #
-# end_row = 1200  #
-
-# Create the list of arrays for the specified range
-#dose_rate_arrays_saved = [data[f"arr_{i}"] for i in range(start_row, end_row)]
-
-# # Alternatively, you can load all the arrays
-# diff_dose_arrays = [data[key] for key in data.keys()]
 
 #jager function y=c-a.e^-bx
 #a = 0.035
