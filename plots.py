@@ -1,13 +1,14 @@
 import matplotlib
 
 matplotlib.use('Agg')  # Set the matplotlib backend to 'Agg'
-
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.animation import FuncAnimation
-from matplotlib.colors import LinearSegmentedColormap, ListedColormap
+from matplotlib.colors import LinearSegmentedColormap, ListedColormap, BoundaryNorm
 
+
+from matplotlib.colors import ListedColormap, BoundaryNorm
 
 def create_animation(detector_arrays):
     """
@@ -19,15 +20,11 @@ def create_animation(detector_arrays):
     Returns:
     None
     """
-
     def update(frame):
         ax.clear()  # Clear the current axes
-        # Set 0 values to background colour
         mask = detector_arrays[frame] == 0
-
-        sns.heatmap(detector_arrays[frame], cmap=cmap, vmax=200, cbar=False, mask=mask, square=True, ax=ax,
+        sns.heatmap(detector_arrays[frame], cmap=cmap, norm=norm, cbar=False, mask=mask, square=True, ax=ax,
                     xticklabels=50, yticklabels=50)
-        # Set the ticks and labels for each frame
         ax.set_xticks(xticks)
         ax.set_yticks(yticks)
         ax.set_xticklabels(xticklabels)
@@ -39,8 +36,12 @@ def create_animation(detector_arrays):
     plt.ioff()  # Turn off interactive mode
 
     # Prepare the custom colormap
-    colors = ["blue", "cyan", "yellow", (0, 1, 0)]  # End with bright green
-    cmap = LinearSegmentedColormap.from_list("custom_green", colors)
+    colors = ["darkblue", "blue", "cyan", "green", "yellow"]  # Define the colors for the colormap
+    cmap = ListedColormap(colors)
+
+    # Prepare the custom norm
+    boundaries = [0, 50, 100, 150, 300, np.inf]  # Define the boundaries for the colors
+    norm = BoundaryNorm(boundaries, cmap.N, clip=True)
 
     # Set up the figure and axis for the animation
     fig, ax = plt.subplots(figsize=(20, 10))
@@ -55,9 +56,59 @@ def create_animation(detector_arrays):
     anim = FuncAnimation(fig, update, frames=len(detector_arrays), interval=50)
 
     # Save the animation
-    anim.save('diff_dose_animation.gif', dpi=80, writer='imagemagick')
+    anim.save('diff_dose_animation_selected.gif', dpi=80, writer='imagemagick')
 
     plt.close()  # Close the plot to prevent it from displaying statically
+
+# def create_animation(detector_arrays):
+#     """
+#     Create an animation of the dose rate over time in the SNC Patient detector array display arrangement.
+#
+#     Parameters:
+#     detector_arrays (list of np.array): List of 2D arrays representing the dose rate at each time point.
+#
+#     Returns:
+#     None
+#     """
+#
+#     def update(frame):
+#         ax.clear()  # Clear the current axes
+#         # Set 0 values to background colour
+#         mask = detector_arrays[frame] == 0
+#
+#         sns.heatmap(detector_arrays[frame], cmap=cmap, vmax=200, cbar=False, mask=mask, square=True, ax=ax,
+#                     xticklabels=50, yticklabels=50)
+#         # Set the ticks and labels for each frame
+#         ax.set_xticks(xticks)
+#         ax.set_yticks(yticks)
+#         ax.set_xticklabels(xticklabels)
+#         ax.set_yticklabels(yticklabels)
+#         ax.set_xlabel('X (cm)')
+#         ax.set_ylabel('Y (cm)')
+#         ax.set_title(f'Time: {frame * 50} ms')
+#
+#     plt.ioff()  # Turn off interactive mode
+#
+#     # Prepare the custom colormap
+#     colors = ["blue", "cyan", "yellow", (0, 1, 0)]  # End with bright green
+#     cmap = LinearSegmentedColormap.from_list("custom_green", colors)
+#
+#     # Set up the figure and axis for the animation
+#     fig, ax = plt.subplots(figsize=(20, 10))
+#
+#     # Customizing the tick labels to fit the spatial dimensions
+#     xticks = np.linspace(0, detector_arrays[0].shape[1], num=11)
+#     yticks = np.linspace(0, detector_arrays[0].shape[0], num=5)
+#     xticklabels = [f"{x - 32.5}" for x in np.linspace(0, 65, num=11)]
+#     yticklabels = [f"{10 - x * 10}" for x in np.linspace(0, 2, num=5)]
+#
+#     # Create the animation
+#     anim = FuncAnimation(fig, update, frames=len(detector_arrays), interval=50)
+#
+#     # Save the animation
+#     anim.save('diff_dose_animation.gif', dpi=80, writer='imagemagick')
+#
+#     plt.close()  # Close the plot to prevent it from displaying statically
 
 
 def create_cumulative_dose_animation(dose_rate_df, dose_accumulated_df, detector_index, start_frame, end_frame):
