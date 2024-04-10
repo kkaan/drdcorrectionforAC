@@ -5,12 +5,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.animation import FuncAnimation
-from matplotlib.colors import LinearSegmentedColormap, ListedColormap, BoundaryNorm
-
-
 from matplotlib.colors import ListedColormap, BoundaryNorm
 
-def create_animation(detector_arrays):
+def create_animation(detector_arrays, xn, yn, detector_number):
     """
     Create an animation of the dose rate over time in the SNC Patient detector array display arrangement.
 
@@ -56,7 +53,7 @@ def create_animation(detector_arrays):
     anim = FuncAnimation(fig, update, frames=len(detector_arrays), interval=50)
 
     # Save the animation
-    anim.save('diff_dose_animation_selected.gif', dpi=80, writer='imagemagick')
+    anim.save(f'diff_dose_animation_selected_{xn}x{yn}_detector_{detector_number}.gif', dpi=80, writer='imagemagick')
 
     plt.close()  # Close the plot to prevent it from displaying statically
 

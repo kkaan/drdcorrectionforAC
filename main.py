@@ -51,16 +51,14 @@ np.savez("dose_rate_arrays.npz", *dose_rate_arrays)
 #b = 5.21*10^-5
 #c = 1
 
+
+
 # Step 1: Identify the indices of the 9 detectors
 detector_number = 610
-diode_numbers_in_snc_array = diode_numbers_in_snc_array() # Get the detector array in SNC display config
-row, col = np.where(dose_rate_arrays[0] == diode_numbers_in_snc_array)  # Find the position of detector number 610
+row, col = np.where(detectorarray == detector_number)  # Find the position of detector number 610
 row, col = row[0], col[0]  # np.where returns arrays, so we take the first element
 
-
-# Calculate the indices of the xxy square centered around the detector
 # Calculate the half size of the square
-xn, yn = 9, 9  # Size of the square
 half_xn = xn // 2
 half_yn = yn // 2
 
@@ -70,8 +68,6 @@ end_row = row + half_xn + 1 if row + half_xn + 1 <= diode_numbers_in_snc_array.s
 start_col = col - half_yn if col - half_yn >= 0 else col
 end_col = col + half_yn + 1 if col + half_yn + 1 <= diode_numbers_in_snc_array.shape[1] else col + 1
 
-# Step 2: Create the new list of arrays
-selected_dose_rate_arrays = [arr[start_row:end_row, start_col:end_col] for arr in dose_rate_arrays[1500:1701]]
 
 # Create a gif animation of the dose rate over time for the selected range of detectors
 create_animation(selected_dose_rate_arrays)
