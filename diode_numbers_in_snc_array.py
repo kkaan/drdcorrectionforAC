@@ -1,4 +1,6 @@
-def reorganize_detectors_in_acl_file(acl_file):
+import numpy as np
+
+def diode_numbers_in_snc_array():
     """
     Reorganizes the detectors numbers in an acl measurement file into the planar array 
     that is displayed in SNC Patient software.
@@ -27,5 +29,7 @@ def reorganize_detectors_in_acl_file(acl_file):
                 break  # Stop if the number exceeds 1386
 
     array = array.astype(int)
+    return array
+
     # Since Python indexing starts at 0, "even" rows and columns as per normal counting are actually odd-indexed in Python
     # This approach automatically leaves even-indexed rows and columns (starting from 0) as zeros, as required
