@@ -30,6 +30,7 @@ dose_rate_df = dose_df / time_interval # cGy/min
 # Create a list of detector arrays arranged in the SNC Patient display configuration
 # Each array represents a frame of the detector array at a specific time point
 dose_rate_arrays = detector_arrays(dose_rate_df)
+arrays = detector_arrays(dose_rate_df)
 np.savez("dose_rate_arrays.npz", *dose_rate_arrays)
 
 # dose_arrays = detector_arrays(dose_df)
