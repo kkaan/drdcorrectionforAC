@@ -40,7 +40,6 @@ data = np.load("dose_rate_arrays.npz")
 start_row = 1000  #
 end_row = 1200  #
 
-test commit
 # Create the list of arrays for the specified range
 #dose_rate_arrays_saved = [data[f"arr_{i}"] for i in range(start_row, end_row)]
 
