@@ -41,16 +41,14 @@ def detector_arrays(acl_detectors):
     acl_detectors (DataFrame): The measurement data arranged in acl formal.
 
     Returns:
-    arrays (list): A list of arrays created from the differential dose data.
+    arrays (ndarray): A 3D numpy array created from the differential dose data.
     """
-    arrays = []  # List to hold all the arrays
+    # Initialize a 3D numpy array with zeros
+    arrays = np.zeros((len(acl_detectors), 41, 131))
 
     for row_index in range(len(acl_detectors)):
         # Extract the counts for the current row
         current_row_counts = acl_detectors.iloc[row_index].values
-
-        # Create an initial array of size 41x131 filled with zeros
-        array = np.zeros((41, 131))
 
         # Initialize the detector number to match the DataFrame's column indexing
         number = 1
@@ -58,12 +56,10 @@ def detector_arrays(acl_detectors):
             for col in range(0, 131, 2):  # Start from the first column, move right in steps of 2
                 if number <= 1386:
                     # Assign the count value corresponding to the detector number
-                    array[row, col] = current_row_counts[number - 1]  # Adjust for 0-based indexing in the array
+                    arrays[row_index, row, col] = current_row_counts[number - 1]  # Adjust for 0-based indexing in the array
                     number += 1
                 else:
                     break  # Stop if the number exceeds 1386
-
-        arrays.append(array)  # Add the created array to the list
 
     return arrays
 
