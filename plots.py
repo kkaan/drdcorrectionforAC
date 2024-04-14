@@ -60,34 +60,45 @@ def create_animation(detector_arrays, xn, yn, detector_number):
 
 
 
-def stacked_histogram(dose_accumulated_df, dose_rate_df, detector_indices):
+def stacked_histogram(dose_df, dose_rate_df, detector_indices):
     all_data = []
     boundaries = [0, 50, 100, 150, 300, np.inf]
-    colors = ["darkblue", "blue", "cyan", "green", "yellow"]
+    labels = ['0-50', '50-100', '100-150', '150-300', '>300']
 
     for detector_index in detector_indices:
-        dose_accumulated_detector = dose_accumulated_df.iloc[:, detector_index]
+        dose_detector = dose_df.iloc[:, detector_index]
         dose_rate_detector = dose_rate_df.iloc[:, detector_index]
 
-        bins = np.digitize(dose_rate_detector, boundaries)
-        data = []
+        # Create a new column for the dose rate bins
+        dose_rate_bins = pd.cut(dose_rate_detector, bins=boundaries, labels=labels, include_lowest=True)
 
-        for i in range(1, len(boundaries)):
-            mask = bins == i
-            accumulated_dose = dose_accumulated_detector[mask].sum()
-            data.append([detector_index, boundaries[i], accumulated_dose])
+        # Create a new DataFrame with the dose and dose rate bins
+        df = pd.DataFrame({
+            'Dose': dose_detector,
+            'Dose Rate Interval': dose_rate_bins
+        })
 
-        df = pd.DataFrame(data, columns=['Detector Number', 'Dose Rate Interval', 'Accumulated Dose'])
         all_data.append(df)
 
     all_data_df = pd.concat(all_data)
 
+    # Define the palette with the appropriate number of colors
+    colors = ["darkblue", "blue", "cyan", "green", "yellow"]
+
     plt.figure(figsize=(10, 6))
-    sns.barplot(x='Detector Number', y='Accumulated Dose', hue='Dose Rate Interval', data=all_data_df, palette=colors)
-    plt.title('Accumulated Dose for Different Dose Rate Intervals')
-    plt.xlabel('Detector Number')
-    plt.ylabel('Accumulated Dose')
-    plt.show()
+    sns.histplot(all_data_df,
+                 x='Dose',
+                 hue='Dose Rate Interval',
+                 multiple="stack",
+                 linewidth='0.3',
+                 palette=colors)
+    plt.title('Dose for Different Dose Rate Intervals')
+    plt.xlabel('Dose')
+    plt.legend(title='Dose Rate Interval')
+    plt.gca().xaxis.set_major_formatter(plt.ticker.ScalarFormatter())
+    plt.xticks(detector_indices)
+    plt.savefig('stacked_histogram.png')
+
 
 # def create_animation(detector_arrays):
 #     """

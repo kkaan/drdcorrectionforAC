@@ -20,6 +20,7 @@ dose_accumulated_df = corrected_df * dose_per_count # cGy
 # Calculate the difference between current row and previous row
 dose_df = dose_accumulated_df.diff()    # cGy
 dose_df = dose_df[1:]   # The first row will be NaNDrop the first row
+dose_accumulated_df = dose_accumulated_df[1:]   # Matching the length of dose_df
 
 # Calculate the dose rate values
 # Assuming the time interval between each frame is 50 ms
@@ -68,7 +69,7 @@ create_animation(selected_dose_rate_arrays, xn, yn, detector_number)
 
 create_cumulative_dose_animation(dose_rate_df, dose_accumulated_df, 610, 1500, 1700)
 
-stacked_histogram(dose_accumulated_df, dose_rate_df, [630, 610, 590, 570, 550])
+stacked_histogram(dose_df, dose_rate_df, [630, 610, 590, 570, 550])
 
 #TODO: Add the code to display the animation
 #TODO: Add the code to plot the cumulative dose over time for a selected detector
