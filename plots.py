@@ -6,13 +6,14 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.animation import FuncAnimation
 from matplotlib.colors import ListedColormap, BoundaryNorm
+import pandas as pd
 
 def create_animation(detector_arrays, xn, yn, detector_number):
     """
     Create an animation of the dose rate over time in the SNC Patient detector array display arrangement.
 
     Parameters:
-    detector_arrays (list of np.array): List of 2D arrays representing the dose rate at each time point.
+    detector_arrays (ndarray): A 3D numpy array representing the dose rate at each time point.
 
     Returns:
     None
@@ -44,18 +45,49 @@ def create_animation(detector_arrays, xn, yn, detector_number):
     fig, ax = plt.subplots(figsize=(20, 10))
 
     # Customizing the tick labels to fit the spatial dimensions
-    xticks = np.linspace(0, detector_arrays[0].shape[1], num=11)
-    yticks = np.linspace(0, detector_arrays[0].shape[0], num=5)
+    xticks = np.linspace(0, detector_arrays.shape[2], num=11)
+    yticks = np.linspace(0, detector_arrays.shape[1], num=5)
     xticklabels = [f"{x - 32.5}" for x in np.linspace(0, 65, num=11)]
     yticklabels = [f"{10 - x * 10}" for x in np.linspace(0, 2, num=5)]
 
     # Create the animation
-    anim = FuncAnimation(fig, update, frames=len(detector_arrays), interval=50)
+    anim = FuncAnimation(fig, update, frames=detector_arrays.shape[0], interval=50)
 
     # Save the animation
     anim.save(f'diff_dose_animation_selected_{xn}x{yn}_detector_{detector_number}.gif', dpi=80, writer='imagemagick')
 
     plt.close()  # Close the plot to prevent it from displaying statically
+
+
+
+def stacked_histogram(dose_accumulated_df, dose_rate_df, detector_indices):
+    all_data = []
+    boundaries = [0, 50, 100, 150, 300, np.inf]
+    colors = ["darkblue", "blue", "cyan", "green", "yellow"]
+
+    for detector_index in detector_indices:
+        dose_accumulated_detector = dose_accumulated_df.iloc[:, detector_index]
+        dose_rate_detector = dose_rate_df.iloc[:, detector_index]
+
+        bins = np.digitize(dose_rate_detector, boundaries)
+        data = []
+
+        for i in range(1, len(boundaries)):
+            mask = bins == i
+            accumulated_dose = dose_accumulated_detector[mask].sum()
+            data.append([detector_index, boundaries[i], accumulated_dose])
+
+        df = pd.DataFrame(data, columns=['Detector Number', 'Dose Rate Interval', 'Accumulated Dose'])
+        all_data.append(df)
+
+    all_data_df = pd.concat(all_data)
+
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x='Detector Number', y='Accumulated Dose', hue='Dose Rate Interval', data=all_data_df, palette=colors)
+    plt.title('Accumulated Dose for Different Dose Rate Intervals')
+    plt.xlabel('Detector Number')
+    plt.ylabel('Accumulated Dose')
+    plt.show()
 
 # def create_animation(detector_arrays):
 #     """
@@ -108,7 +140,7 @@ def create_animation(detector_arrays, xn, yn, detector_number):
 #     plt.close()  # Close the plot to prevent it from displaying statically
 
 
-def create_cumulative_dose_animation(dose_rate_df, dose_accumulated_df, detector_index, start_frame, end_frame):
+def create_cumulative_dose(dose_rate_df, dose_accumulated_df, detector_index, start_frame, end_frame):
     """
     Create an animation of the accumulated dose over time for a specific detector,
     with the color of the marker indicating the dose rate.

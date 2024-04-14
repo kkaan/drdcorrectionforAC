@@ -1,6 +1,6 @@
 import numpy as np
 from read_acl_file import read_detector_file, detector_arrays
-from plots import create_animation, create_cumulative_dose_animation
+from plots import create_animation, stacked_histogram
 from diode_numbers_in_snc_array import diode_numbers_in_snc_array
 
 # Read the detector file
@@ -47,7 +47,7 @@ row, col = row[0], col[0]  # np.where returns arrays, so we take the first eleme
 
 # Calculate the half size of the square
 xn = 31
-yn = 11
+yn = 15
 half_xn = xn // 2
 half_yn = yn // 2
 
@@ -57,14 +57,18 @@ end_row = row + half_xn + 1 if row + half_xn + 1 <= diode_numbers_in_snc_array.s
 start_col = col - half_yn if col - half_yn >= 0 else col
 end_col = col + half_yn + 1 if col + half_yn + 1 <= diode_numbers_in_snc_array.shape[1] else col + 1
 
-selected_dose_rate_arrays = dose_rate_arrays[start_row:end_row, start_col:end_col]
+startframe = 1500
+endframe = 1700
+
+
+selected_dose_rate_arrays = dose_rate_arrays[startframe:endframe, start_row:end_row, start_col:end_col]
 
 # Create a gif animation of the dose rate over time for the selected range of detectors
-create_animation(selected_dose_rate_arrays)
+create_animation(selected_dose_rate_arrays, xn, yn, detector_number)
 
-#create_cumulative_dose_animation(dose_rate_df, dose_accumulated_df, 610, 1500, 1700)
+create_cumulative_dose_animation(dose_rate_df, dose_accumulated_df, 610, 1500, 1700)
 
-#create_histogram(dose_rate_df, dose_accumulated_df)
+stacked_histogram(dose_accumulated_df, dose_rate_df, [630, 610, 590, 570, 550])
 
 #TODO: Add the code to display the animation
 #TODO: Add the code to plot the cumulative dose over time for a selected detector
