@@ -1,7 +1,10 @@
 import numpy as np
+import jager
 from read_acl_file import read_detector_file, detector_arrays
 import plots
 from diode_numbers_in_snc_array import diode_numbers_in_snc_array
+
+
 
 # Read the detector file
 file_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6Xcropped.txt'
@@ -27,7 +30,6 @@ dose_accumulated_df = dose_accumulated_df[1:]   # Matching the length of dose_df
 time_interval = 50/60000  # in minutes
 dose_rate_df = dose_df / time_interval # cGy/min
 
-
 # Create a list of detector arrays arranged in the SNC Patient display configuration
 # Each array represents a frame of the detector array at a specific time point
 dose_rate_arrays = detector_arrays(dose_rate_df)
@@ -39,7 +41,7 @@ a_pr = 0.035
 b_pr = 5.21*10**-5  # Corrected the exponentiation operator
 c_pr = 1
 
-jager_pr_coefficients = np.array([d, e, f])
+jager_pr_coefficients = np.array([a_pr, b_pr, c_pr])
 
 # Jager dose per pulse coefficients (MU/min)
 # https://doi.org/10.1002/acm2.13409 figure 3
@@ -47,15 +49,21 @@ a_dpp = 0.0978
 b_dpp = 3.33*10**-5  # Corrected the exponentiation operator
 c_dpp = 1.0011
 
-jager_dpp_coefficients = np.array([a, b, c])
+jager_dpp_coefficients = np.array([a_dpp, b_dpp, c_dpp])
+
+pr_corrected_count_df = jager.pulse_rate_correction(counts_accumulated_df, jager_pr_coefficients)
+dpp_corrected_count_df = jager.dose_per_pulse_correction(counts_accumulated_df, jager_dpp_coefficients)
+
+pr_corrected_dose_df = pr_corrected_count_df * dose_per_count
+dpp_corrected_dose_df = dpp_corrected_count_df * dose_per_count
 
 
-
+# Create a list of detector arrays arranged in the SNC Patient display configuration
 diode_numbers_in_snc_array = diode_numbers_in_snc_array()
 X= np.arange(-32.5, 33, 0.5)
 Y = np.arange(10, -10.5, -0.5)
 
-
+# Select a xn by yn square centered around detector number 61
 # Step 1: Identify the indices of the 9 detectors
 detector_number = 610
 row, col = np.where(diode_numbers_in_snc_array == detector_number)  # Find the position of detector number 610

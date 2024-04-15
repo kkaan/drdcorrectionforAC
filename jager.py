@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-def pulse_rate_correction(counts_df, jager_pr_coefficients):
+def pulse_rate_correction(counts_acummulated_df, jager_pr_coefficients):
     """
     Corrects the count values in the dataframe using the Jager pulse rate correction coefficients.
 
@@ -15,15 +15,15 @@ def pulse_rate_correction(counts_df, jager_pr_coefficients):
     a, b, c = jager_pr_coefficients
 
     # Calculate the count rate
-    count_rate_df = counts_df.diff()  # cGy
-    count_rate_df = count_rate_df[1:]  # The first row will be NaN, drop the first row
+    count_df = counts_acummulated_df.diff()  # cGy
+    count_df = count_df[1:]  # The first row will be NaN, drop the first row
 
     # Apply the correction factor formula
-    jcf_pr_df = c - a * np.exp(-b * count_rate_df)
-    pr_corrected_count_rate_df = count_rate_df * jcf_pr_df
-    return pr_corrected_count_rate_df
+    jcf_pr_df = c - a * np.exp(-b * count_df)
+    pr_corrected_count_df = count_df * jcf_pr_df
+    return pr_corrected_count_df
 
-def dose_per_pulse_correction(counts_df, jager_dpp_coefficients):
+def dose_per_pulse_correction(counts_acummulated_df, jager_dpp_coefficients):
     """
     Corrects the count values in the dataframe using the Jager dose per pulse correction coefficients.
 
@@ -37,13 +37,13 @@ def dose_per_pulse_correction(counts_df, jager_dpp_coefficients):
     a, b, c = jager_dpp_coefficients
 
     # Calculate the count rate
-    count_rate_df = counts_df.diff()  # cGy
-    count_rate_df = count_rate_df[1:]  # The first row will be NaN, drop the first row
+    count_df = counts_acummulated_df.diff()  # cGy
+    count_df = count_df[1:]  # The first row will be NaN, drop the first row
 
     # Apply the correction factor formula
-    jcf_dpp_df = c - a * np.exp(-b * count_rate_df)
-    dpp_corrected_count_rate_df = count_rate_df * jcf_dpp_df
-    return dpp_corrected_count_rate_df
+    jcf_dpp_df = c - a * np.exp(-b * count_df)
+    dpp_corrected_count_df = count_df * jcf_dpp_df
+    return dpp_corrected_count_df
 
 
 
