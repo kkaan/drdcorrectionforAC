@@ -90,7 +90,7 @@ def stacked_histogram(dose_df, dose_rate_df, detector_indices):
     colors = ["darkblue", "blue", "cyan", "green", "yellow"]
 
     f, ax = plt.subplots(figsize=(7, 5))
-
+    print(colors)
     sns.histplot(
         all_data_df,
         x="Detector",  # Set the x parameter to "Detector"
