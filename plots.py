@@ -1,15 +1,10 @@
-import matplotlib
-
-matplotlib.use('Agg')  # Set the matplotlib backend to 'Agg'
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.animation import FuncAnimation
 from matplotlib.colors import ListedColormap, BoundaryNorm
 import pandas as pd
-from matplotlib.colors import ListedColormap
 
-matplotlib.use('TkAgg')
 def create_animation(detector_arrays, xn, yn, detector_number):
     """
     Create an animation of the dose rate over time in the SNC Patient detector array display arrangement.
@@ -62,14 +57,14 @@ def create_animation(detector_arrays, xn, yn, detector_number):
     plt.close()  # Close the plot to prevent it from displaying statically
 
 
-def stacked_histogram(dose_df, dose_rate_df, detector_indices):
+def stacked_histogram(dose_df, dose_rate_df, detector_names):
     all_data = []
     boundaries = [0, 50, 100, 150, 300, np.inf]
     labels = ['0-50', '50-100', '100-150', '150-300', '>300']
 
-    for detector_index in detector_indices:
-        dose_detector = dose_df.iloc[:, detector_index]
-        dose_rate_detector = dose_rate_df.iloc[:, detector_index]
+    for detector_name in detector_names:
+        dose_detector = dose_df.iloc[:, detector_name]
+        dose_rate_detector = dose_rate_df.iloc[:, detector_name]
 
         # Create a new column for the dose rate bins
         dose_rate_bins = pd.cut(dose_rate_detector, bins=boundaries, labels=labels, include_lowest=True)
@@ -78,33 +73,35 @@ def stacked_histogram(dose_df, dose_rate_df, detector_indices):
         df = pd.DataFrame({
             'Dose': dose_detector,
             'Dose Rate Interval': dose_rate_bins,
-            'Detector': detector_index  # Add a column for the detector index
+            'Detector Names': detector_name  # Change 'Detector' to 'Detector Names'
         })
-
         all_data.append(df)
 
     all_data_df = pd.concat(all_data)
 
+    # Group the data by 'Detector Names' and 'Dose Rate Interval' and calculate the sum of 'Dose' for each group
+    grouped_data = all_data_df.groupby(['Detector Names', 'Dose Rate Interval'])['Dose'].sum().reset_index()
 
     # Define your colors
-    colors = ["darkblue", "blue", "cyan", "green", "yellow"]
+    colors = ["darkblue", "dodgerblue", "blue", "teal", "green"]  # Use the blue-green spectrum colors
 
-    f, ax = plt.subplots(figsize=(7, 5))
-    print(colors)
-    sns.histplot(
-        all_data_df,
-        x="Detector",  # Set the x parameter to "Detector"
-        y="Dose",  # Set the y parameter to "Dose"
-        hue="Dose Rate Interval",
-        multiple="stack",
-        palette=colors,
+    # Create the bar plot
+    bar_plot = sns.barplot(
+        data=grouped_data,
+        x='Detector Names',
+        y='Dose',
+        hue='Dose Rate Interval',
+        palette="viridis",  # Use the list of colors directly
         edgecolor=".3",
         linewidth=.5,
-        log_scale=True,
     )
+    bar_plot.set_ylim(0, 20)  # Adjust these values as needed
 
-    plt.show()
+    plt.gca().xaxis.set_major_formatter(mtick.FormatStrFormatter('%.0f'))
+    plt.xlabel('Detector Names')  # Set x-axis label to 'Detector Names'
+    plt.ylabel('Dose Sum')  # Set y-axis label to 'Dose Sum'
     plt.savefig('stacked_histogram.png')
+    plt.show()
 
 # def create_animation(detector_arrays):
 #     """
