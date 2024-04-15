@@ -32,7 +32,7 @@ def create_animation(detector_arrays, xn, yn, detector_number):
     plt.ioff()  # Turn off interactive mode
 
     # Prepare the custom colormap
-    colors = ["darkblue", "blue", "cyan", "green", "yellow"]  # Define the colors for the colormap
+    colors = ["dodgerblue", "deepskyblue", "turquoise", "springgreen", "seagreen"]  # Define the colors for the colormap
     cmap = ListedColormap(colors)
 
     # Prepare the custom norm
@@ -83,7 +83,7 @@ def stacked_histogram(dose_df, dose_rate_df, detector_names):
     grouped_data = all_data_df.groupby(['Detector Names', 'Dose Rate Interval'])['Dose'].sum().reset_index()
 
     # Define your colors
-    colors = ["darkblue", "dodgerblue", "blue", "teal", "green"]  # Use the blue-green spectrum colors
+    colors = ["dodgerblue", "deepskyblue", "turquoise", "springgreen", "seagreen"]  # Use the blue-green spectrum colors
 
     # Create the bar plot
     bar_plot = sns.barplot(
@@ -91,17 +91,17 @@ def stacked_histogram(dose_df, dose_rate_df, detector_names):
         x='Detector Names',
         y='Dose',
         hue='Dose Rate Interval',
-        palette="viridis",  # Use the list of colors directly
+        palette=colors,  # Use the list of colors directly
         edgecolor=".3",
         linewidth=.5,
     )
     bar_plot.set_ylim(0, 20)  # Adjust these values as needed
 
-    plt.gca().xaxis.set_major_formatter(mtick.FormatStrFormatter('%.0f'))
     plt.xlabel('Detector Names')  # Set x-axis label to 'Detector Names'
     plt.ylabel('Dose Sum')  # Set y-axis label to 'Dose Sum'
     plt.savefig('stacked_histogram.png')
     plt.show()
+
 
 # def create_animation(detector_arrays):
 #     """
