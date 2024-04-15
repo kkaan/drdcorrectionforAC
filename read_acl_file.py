@@ -10,7 +10,7 @@ def read_detector_file(file_path):
     Reads a detector file and returns the data, background, and calibration factor.
 
     Parameters:
-    file_path (str): The path to the detector file.
+    acml_file_path (str): The path to the detector file.
 
     Returns:
     data (DataFrame): The data from the detector file.
