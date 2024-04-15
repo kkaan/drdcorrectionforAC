@@ -31,5 +31,6 @@ def diode_numbers_in_snc_array():
     array = array.astype(int)
     return array
 
+def
     # Since Python indexing starts at 0, "even" rows and columns as per normal counting are actually odd-indexed in Python
     # This approach automatically leaves even-indexed rows and columns (starting from 0) as zeros, as required
