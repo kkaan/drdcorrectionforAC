@@ -65,9 +65,9 @@ endframe = 1700
 selected_dose_rate_arrays = dose_rate_arrays[startframe:endframe, start_row:end_row, start_col:end_col]
 
 # Create a gif animation of the dose rate over time for the selected range of detectors
-create_animation(selected_dose_rate_arrays, xn, yn, detector_number)
+#create_animation(selected_dose_rate_arrays, xn, yn, detector_number)
 
-create_cumulative_dose_animation(dose_rate_df, dose_accumulated_df, 610, 1500, 1700)
+#create_cumulative_dose_animation(dose_rate_df, dose_accumulated_df, 610, 1500, 1700)
 
 stacked_histogram(dose_df, dose_rate_df, [630, 610, 590, 570, 550])
 

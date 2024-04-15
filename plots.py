@@ -7,7 +7,9 @@ import seaborn as sns
 from matplotlib.animation import FuncAnimation
 from matplotlib.colors import ListedColormap, BoundaryNorm
 import pandas as pd
+from matplotlib.colors import ListedColormap
 
+matplotlib.use('TkAgg')
 def create_animation(detector_arrays, xn, yn, detector_number):
     """
     Create an animation of the dose rate over time in the SNC Patient detector array display arrangement.
@@ -18,6 +20,7 @@ def create_animation(detector_arrays, xn, yn, detector_number):
     Returns:
     None
     """
+
     def update(frame):
         ax.clear()  # Clear the current axes
         mask = detector_arrays[frame] == 0
@@ -59,7 +62,6 @@ def create_animation(detector_arrays, xn, yn, detector_number):
     plt.close()  # Close the plot to prevent it from displaying statically
 
 
-
 def stacked_histogram(dose_df, dose_rate_df, detector_indices):
     all_data = []
     boundaries = [0, 50, 100, 150, 300, np.inf]
@@ -72,33 +74,37 @@ def stacked_histogram(dose_df, dose_rate_df, detector_indices):
         # Create a new column for the dose rate bins
         dose_rate_bins = pd.cut(dose_rate_detector, bins=boundaries, labels=labels, include_lowest=True)
 
-        # Create a new DataFrame with the dose and dose rate bins
+        # Create a new DataFrame with the dose, dose rate bins, and detector index
         df = pd.DataFrame({
             'Dose': dose_detector,
-            'Dose Rate Interval': dose_rate_bins
+            'Dose Rate Interval': dose_rate_bins,
+            'Detector': detector_index  # Add a column for the detector index
         })
 
         all_data.append(df)
 
     all_data_df = pd.concat(all_data)
 
-    # Define the palette with the appropriate number of colors
+
+    # Define your colors
     colors = ["darkblue", "blue", "cyan", "green", "yellow"]
 
-    plt.figure(figsize=(10, 6))
-    sns.histplot(all_data_df,
-                 x='Dose',
-                 hue='Dose Rate Interval',
-                 multiple="stack",
-                 linewidth='0.3',
-                 palette=colors)
-    plt.title('Dose for Different Dose Rate Intervals')
-    plt.xlabel('Dose')
-    plt.legend(title='Dose Rate Interval')
-    plt.gca().xaxis.set_major_formatter(plt.ticker.ScalarFormatter())
-    plt.xticks(detector_indices)
-    plt.savefig('stacked_histogram.png')
+    f, ax = plt.subplots(figsize=(7, 5))
 
+    sns.histplot(
+        all_data_df,
+        x="Detector",  # Set the x parameter to "Detector"
+        y="Dose",  # Set the y parameter to "Dose"
+        hue="Dose Rate Interval",
+        multiple="stack",
+        palette=colors,
+        edgecolor=".3",
+        linewidth=.5,
+        log_scale=True,
+    )
+
+    plt.show()
+    plt.savefig('stacked_histogram.png')
 
 # def create_animation(detector_arrays):
 #     """
