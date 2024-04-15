@@ -4,11 +4,11 @@ from read_acl_file import read_detector_file, detector_arrays
 import plots
 from diode_numbers_in_snc_array import diode_numbers_in_snc_array
 
-
-
 # Read the detector file
-file_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6Xcropped.txt'
-data_df, background, calibration_factor = read_detector_file(file_path)
+acml_file_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6Xcropped.txt'
+txt_file_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6X.txt'
+
+data_df, background, calibration_factor = read_detector_file(acml_file_path)
 
 # Correct the counts for background and detector sensitivity calibration factor
 counts_accumulated_df = (data_df - background) * calibration_factor
@@ -97,6 +97,5 @@ plots.scatter_cumulative_dose(dose_rate_df[startframe:endframe], dose_accumulate
 
 plots.bar_doserate_histogram(dose_df, dose_rate_df, [630, 610, 590, 570, 550])
 
-#TODO: Add the code to display the animation
-#TODO: Add the code to plot the cumulative dose over time for a selected detector
-#TODO: Add the code to plot
+
+# TODO: Create a function to put the corrected dose values back into the .txt file
