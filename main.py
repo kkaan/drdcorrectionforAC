@@ -1,14 +1,13 @@
 import numpy as np
 import jager
-from read_acl_file import read_detector_file, detector_arrays
+from read_snc_files import read_acl_file, detector_arrays, diode_numbers_in_snc_array
 import plots
-from diode_numbers_in_snc_array import diode_numbers_in_snc_array
 
 # Read the detector file
 acml_file_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6Xcropped.txt'
 txt_file_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6X.txt'
 
-data_df, background, calibration_factor = read_detector_file(acml_file_path)
+data_df, background, calibration_factor = read_acl_file(acml_file_path)
 
 # Correct the counts for background and detector sensitivity calibration factor
 counts_accumulated_df = (data_df - background) * calibration_factor
@@ -90,7 +89,7 @@ selected_X = X[start_col:end_col]
 selected_Y = Y[start_row:end_row]
 
 # Create a gif animation of the dose rate over time for the selected range of detectors
-plots.create_animation(selected_dose_rate_arrays, xn, yn, detector_number)
+plots.create_animation(dose_rate_arrays, xn, yn, detector_number)
 
 plots.scatter_cumulative_dose(dose_rate_df[startframe:endframe], dose_accumulated_df[startframe:endframe],
                               detector_number)
