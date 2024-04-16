@@ -4,6 +4,80 @@
 # NOTE: Currently only takes in pre-formatted interim tab delimited file.
 import pandas as pd
 import numpy as np
+import os
+
+def parse_arccheck_header(file_path):
+    if not os.path.exists(file_path):
+        print(f"Error: The file {file_path} does not exist.")
+        return None
+
+    header_keys = {
+        'FileName': None, 'Firmware Version': None, 'Hardware Revision': None, 'Diode Type': None,
+        'Temperature': None, 'Inclinometer Tilt': None, 'Inclinometer Rotation': None,
+        'Background Threshold': None, 'Measured Cavity Dose': None, 'Date': None, 'Time': None,
+        'Serial No': None, 'Overrange Error': None, 'Cal File': None, 'Dose per Count': None,
+        'Dose Info': None, 'Dose IDDC': None, 'Time': None, 'Orientation': None, 'Rows': None,
+        'Cols': None, 'CAX X': None, 'CAX Y': None, 'Device Position QA': None, 'Shift X': None,
+        'Shift Y': None, 'Shift Z': None, 'Rotation X': None, 'Rotation Y': None, 'Rotation Z': None,
+        'Manufacturer': None, 'Energy': None, 'Plug Present': None, 'Applied Angular': None,
+        'Applied Field Size': None, 'Applied Heterogeneity': None
+    }
+
+    try:
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+
+        found_header = False
+        for line in lines:
+            line = line.strip()
+            if line == "Background":  # New delimiter to stop parsing header
+                break
+            key_value = line.split(':')
+            if len(key_value) == 2:
+                key, value = key_value[0].strip(), key_value[1].strip()
+                if key in header_keys:
+                    header_keys[key] = value
+                    found_header = True
+
+        if not found_header:
+            print("Warning: No valid header information found.")
+        else:
+            print("Header information successfully parsed.")
+        return header_keys
+
+    except Exception as e:
+        print(f"Error reading file: {e}")
+        return None
+
+def parse_arrays_from_file(file_path):
+    array_data = {}
+    current_array = None
+    array_content = []
+
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    for line in lines:
+        if any(name in line for name in ['Background', 'Calibration Factors', 'Offset', 'Raw Counts', 'Corrected Counts',
+                                         'Dose Counts', 'Data Flags', 'Interpolated', 'Dose Interpolated',
+                                         'Corrected Counts (No Angular Correction)']):
+            if current_array is not None:
+                # Handle conversion by ensuring all rows are the same length
+                max_length = max(len(row) for row in array_content)
+                uniform_content = [row + [None] * (max_length - len(row)) for row in array_content]
+                array_data[current_array] = np.array(uniform_content, dtype=object)  # Use dtype=object for mixed types
+            current_array = line.strip()
+            array_content = []
+        elif current_array is not None:
+            parsed_line = line.split()
+            array_content.append(parsed_line)
+
+    if current_array is not None:
+        max_length = max(len(row) for row in array_content)
+        uniform_content = [row + [None] * (max_length - len(row)) for row in array_content]
+        array_data[current_array] = np.array(uniform_content, dtype=object)
+
+    return array_data
 
 def read_acl_file(file_path):
     """
@@ -62,7 +136,6 @@ def detector_arrays(acl_detectors):
                     break  # Stop if the number exceeds 1386
 
     return arrays
-
 
 def diode_numbers_in_snc_array():
     """
