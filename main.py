@@ -21,6 +21,9 @@ else:
 
 file_path = 'output_snc_file.txt'
 io_snc.write_snc_txt_file(arrays_txt, header_txt, file_path)
+#TOFIX: This output of the .txt file is not working properly. The output file is not in the correct format.
+
+
 
 # Correct the counts for background and detector sensitivity calibration factor
 counts_accumulated_df = (data_df - background) * calibration_factor
