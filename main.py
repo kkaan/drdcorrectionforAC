@@ -1,13 +1,23 @@
 import numpy as np
-import jager
-from read_snc_files import read_acl_file, detector_arrays, diode_numbers_in_snc_array
+import io_snc
 import plots
+import corrections
 
 # Read the detector file
 acml_file_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6Xcropped.txt'
 txt_file_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6X.txt'
 
-data_df, background, calibration_factor = read_acl_file(acml_file_path)
+data_df, background, calibration_factor = io_snc.read_acl_file(acml_file_path)
+header_txt = io_snc.parse_arccheck_header(txt_file_path)
+arrays_txt = io_snc.parse_arrays_from_file(txt_file_path)
+
+# Assuming 'arrays' is the dictionary loaded with your data
+intrinsic_corrections = corrections.get_intrinsic_corrections(arrays_txt)
+if intrinsic_corrections is not None:
+    print("Intrinsic Corrections Array:")
+    print(intrinsic_corrections)
+else:
+    print("Failed to calculate intrinsic corrections.")
 
 # Correct the counts for background and detector sensitivity calibration factor
 counts_accumulated_df = (data_df - background) * calibration_factor
@@ -31,7 +41,7 @@ dose_rate_df = dose_df / time_interval # cGy/min
 
 # Create a list of detector arrays arranged in the SNC Patient display configuration
 # Each array represents a frame of the detector array at a specific time point
-dose_rate_arrays = detector_arrays(dose_rate_df)
+dose_rate_arrays = io_snc.detector_arrays(dose_rate_df)
 
 ## This section is for the Jager pulse rate correction
 # Jager pulse rate coefficients
@@ -50,15 +60,15 @@ c_dpp = 1.0011
 
 jager_dpp_coefficients = np.array([a_dpp, b_dpp, c_dpp])
 
-pr_corrected_count_df = jager.pulse_rate_correction(counts_accumulated_df, jager_pr_coefficients)
-dpp_corrected_count_df = jager.dose_per_pulse_correction(counts_accumulated_df, jager_dpp_coefficients)
+pr_corrected_count_df = corrections.pulse_rate_correction(counts_accumulated_df, jager_pr_coefficients)
+dpp_corrected_count_df = corrections.dose_per_pulse_correction(counts_accumulated_df, jager_dpp_coefficients)
 
 pr_corrected_dose_df = pr_corrected_count_df * dose_per_count
 dpp_corrected_dose_df = dpp_corrected_count_df * dose_per_count
 
 
 # Create a list of detector arrays arranged in the SNC Patient display configuration
-diode_numbers_in_snc_array = diode_numbers_in_snc_array()
+diode_numbers_in_snc_array = io_snc.diode_numbers_in_snc_array()
 X= np.arange(-32.5, 33, 0.5)
 Y = np.arange(10, -10.5, -0.5)
 

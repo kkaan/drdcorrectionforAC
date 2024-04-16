@@ -79,6 +79,34 @@ def parse_arrays_from_file(file_path):
 
     return array_data
 
+def write_snc_txt_file(array_data, header_data, file_path):
+    """
+    Writes the array data and header into a .txt file in the same format as it was read.
+
+    Parameters:
+    - array_data (dict): Dictionary containing all the array data.
+    - header_data (dict): Dictionary containing all the header information.
+    - file_path (str): Path to the file where the data should be saved.
+    """
+    try:
+        with open(file_path, 'w') as file:
+            # Write the header information
+            for key, value in header_data.items():
+                if value is not None:
+                    file.write(f"{key}: {value}\n")
+            file.write("\n")  # End of header part
+
+            # Write each array
+            for array_name, array_content in array_data.items():
+                file.write(f"{array_name}\n")
+                for row in array_content:
+                    row_data = ' '.join(str(x) for x in row)
+                    file.write(f"{row_data}\n")
+                file.write("\n")  # Separate arrays by a newline for clarity
+
+    except Exception as e:
+        print(f"An error occurred while writing to file: {e}")
+
 def read_acl_file(file_path):
     """
     Reads a detector file and returns the data, background, and calibration factor.
