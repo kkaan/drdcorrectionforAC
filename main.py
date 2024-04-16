@@ -19,6 +19,9 @@ if intrinsic_corrections is not None:
 else:
     print("Failed to calculate intrinsic corrections.")
 
+file_path = 'output_snc_file.txt'
+io_snc.write_snc_txt_file(arrays_txt, header_txt, file_path)
+
 # Correct the counts for background and detector sensitivity calibration factor
 counts_accumulated_df = (data_df - background) * calibration_factor
 
