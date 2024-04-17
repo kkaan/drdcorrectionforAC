@@ -125,12 +125,14 @@ def write_snc_txt_file(array_data, header_data, file_path):
         print(f"An error occurred while writing to file: {e}")
 
 
+import pandas as pd
+
 def parse_acm_file(file_path):
     frame_data_keys = [
         'TYPE', 'UPDATE#', 'TIMETIC1', 'TIMETIC2', 'PULSES',
         'STATUS1', 'STATUS2', 'VirtualInclinometer', 'CorrectedAngle', 'FieldSize'
     ]
-    diode_data_keys = ['Reference Diode'] + [str(i) for i in range(1, 1369)]  # 1368 diodes + reference diode
+    diode_data_keys = ['Reference Diode'] + [str(i) for i in range(1, 1387)]  # 1368 diodes + reference diode
 
     # Initialize storage for frame data and diode data
     frame_data = []
@@ -146,8 +148,19 @@ def parse_acm_file(file_path):
     # Ensure data_header matches the provided keys
     assert data_header == frame_data_keys + diode_data_keys[:len(data_header) - len(frame_data_keys)]
 
+    # Extract Background and Calibration data
+    background_data = lines[data_header_index + 1].strip().split('\t')[10:]  # Skip 'Background' line
+    calibration_data = lines[data_header_index + 2].strip().split('\t')[10:]  # Skip 'Calibration' line
+
+    # Create a DataFrame for Background and Calibration data
+    bkrnd_and_calibration_df = pd.DataFrame({
+        'Detector Names': diode_data_keys,
+        'Background': background_data,
+        'Calibration': calibration_data
+    })
+
     # Process each line of data after the headers
-    for line in lines[data_header_index + 2:]:  # Skip 'Background' and 'Calibration' lines
+    for line in lines[data_header_index + 3:]:  # Skip 'Background' and 'Calibration' lines
         row_data = line.strip().split('\t')
         if row_data[0] == 'Data:':  # Ensure we are reading a data line
             # Split frame data and diode data based on the known structure
@@ -160,8 +173,7 @@ def parse_acm_file(file_path):
     frame_data = np.array(frame_data, dtype=float)
     diode_data = np.array(diode_data, dtype=float)
 
-    return frame_data, diode_data
-
+    return frame_data, diode_data, bkrnd_and_calibration_df
 
 
 def detector_arrays(acl_detectors):
