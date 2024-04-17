@@ -21,7 +21,7 @@ def parse_arccheck_header(file_path):
         'Shift Y': None, 'Shift Z': None, 'Rotation X': None, 'Rotation Y': None, 'Rotation Z': None,
         'Manufacturer': None, 'Energy': None, 'Plug Present': None, 'Applied Angular': None,
         'Applied Field Size': None, 'Applied Heterogeneity': None,
-        'Full Header Text': ''  # Initialize the key to store full header text
+        'Full Header Text': ''
     }
 
     try:
@@ -31,9 +31,9 @@ def parse_arccheck_header(file_path):
         full_header_text = ""
         found_header = False
         for line in lines:
-            full_header_text += line  # Concatenate each line to the full header text
-            if line.strip() == "Background":  # New delimiter to stop parsing header
+            if line.strip() == "Background":  # Check for delimiter before appending to header text
                 break
+            full_header_text += line
             key_value = line.split(':')
             if len(key_value) == 2:
                 key, value = key_value[0].strip(), key_value[1].strip()
@@ -41,7 +41,8 @@ def parse_arccheck_header(file_path):
                     header_keys[key] = value
                     found_header = True
 
-        header_keys['Full Header Text'] = full_header_text.strip()  # Store the accumulated header text
+        # Strip the last newline character to clean up the header text
+        header_keys['Full Header Text'] = full_header_text.rstrip()
 
         if not found_header:
             print("Warning: No valid header information found.")
@@ -94,6 +95,7 @@ def parse_arrays_from_file(file_path):
 def write_snc_txt_file(array_data, header_data, file_path):
     """
     Writes the array data and header into a .txt file in the same format as it was read.
+    Omits None values and uses tabs instead of spaces between array values.
 
     Parameters:
     - array_data (dict): Dictionary containing all the array data.
@@ -105,14 +107,18 @@ def write_snc_txt_file(array_data, header_data, file_path):
             # Write the full header text directly from the header_data dictionary
             if 'Full Header Text' in header_data:
                 file.write(header_data['Full Header Text'])
-                file.write("\n")  # Ensure there's a blank line after the header if not already present in 'Full Header Text'
+                file.write("\n\n")  # Ensure there's a blank line after the header
 
-            # Write each array
+            # Write each array, skipping None values and using tabs as delimiter
             for array_name, array_content in array_data.items():
                 file.write(f"{array_name}\n")
                 for row in array_content:
-                    row_data = ' '.join(str(x) for x in row)
-                    file.write(f"{row_data}\n")
+                    # Only write the row if it contains any non-None values
+                    if any(x is not None for x in row):
+                        row_data = '\t'.join(str(x) for x in row if x is not None)
+                        # Add a tab character before 'COL' and 'Xcm'
+                        row_data = row_data.replace('COL', '\tCOL').replace('Xcm', '\tXcm')
+                        file.write(f"{row_data}\n")
                 file.write("\n")  # Separate arrays by a newline for clarity
 
     except Exception as e:
