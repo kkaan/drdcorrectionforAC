@@ -3,13 +3,16 @@ import io_snc
 import plots
 import corrections
 
-# Read the detector file
+# Read the detector files
 acml_file_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6Xcropped.txt'
 txt_file_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6X.txt'
 
 data_df, background, calibration_factor = io_snc.read_acl_file(acml_file_path)
 header_data = io_snc.parse_arccheck_header(txt_file_path)
 array_data = io_snc.parse_arrays_from_file(txt_file_path)
+
+
+
 
 # Assuming 'arrays' is the dictionary loaded with your data
 intrinsic_corrections = corrections.get_intrinsic_corrections(array_data)
@@ -18,6 +21,10 @@ if intrinsic_corrections is not None:
     print(intrinsic_corrections)
 else:
     print("Failed to calculate intrinsic corrections.")
+
+# Apply the Jager Dose per Pulse to the differential raw counts corrected counts
+
+
 
 file_path = 'output_snc_file.txt'
 io_snc.write_snc_txt_file(array_data, header_data, file_path)

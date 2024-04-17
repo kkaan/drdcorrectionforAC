@@ -1,13 +1,5 @@
 import numpy as np
 
-import numpy as np
-
-import numpy as np
-
-import numpy as np
-
-import numpy as np
-
 def get_intrinsic_corrections(array_data):
     """
     Calculate the Intrinsic Correction array as an element-wise division of Corrected Counts by Raw Counts,
