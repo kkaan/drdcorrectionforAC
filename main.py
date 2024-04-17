@@ -4,14 +4,12 @@ import plots
 import corrections
 
 # Read the detector files
-acml_file_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6Xcropped.txt'
+acml_file_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6X.acm'
 txt_file_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6X.txt'
 
-data_df, background, calibration_factor = io_snc.read_acl_file(acml_file_path)
+acm_data, bkgrd_and_cal_df = io_snc.parse_acm_file(acml_file_path)
 header_data = io_snc.parse_arccheck_header(txt_file_path)
 array_data = io_snc.parse_arrays_from_file(txt_file_path)
-
-
 
 
 # Assuming 'arrays' is the dictionary loaded with your data

@@ -124,33 +124,45 @@ def write_snc_txt_file(array_data, header_data, file_path):
     except Exception as e:
         print(f"An error occurred while writing to file: {e}")
 
-def read_acl_file(file_path):
-    """
-    Reads a detector file and returns the data, background, and calibration factor.
 
-    Parameters:
-    acml_file_path (str): The path to the detector file.
+def parse_acm_file(file_path):
+    frame_data_keys = [
+        'TYPE', 'UPDATE#', 'TIMETIC1', 'TIMETIC2', 'PULSES',
+        'STATUS1', 'STATUS2', 'VirtualInclinometer', 'CorrectedAngle', 'FieldSize'
+    ]
+    diode_data_keys = ['Reference Diode'] + [str(i) for i in range(1, 1369)]  # 1368 diodes + reference diode
 
-    Returns:
-    data (DataFrame): The data from the detector file.
-    background (array): The background values from the detector file.
-    calibration_factor (array): The calibration factor values from the detector file.
-    """
-    # Read the header row for column names
-    col_names = pd.read_csv(file_path, sep='\t', nrows=0).columns
+    # Initialize storage for frame data and diode data
+    frame_data = []
+    diode_data = []
 
-    # Read the 'background' and 'calibration factor' rows
-    metadata = pd.read_csv(file_path, sep='\t', nrows=2, skiprows=[0], header=None)
-    background = metadata.iloc[0, :].values
-    calibration_factor = metadata.iloc[1, :].values
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
 
-    # Read the actual count data, skipping the first three rows
-    data = pd.read_csv(file_path, sep='\t', skiprows=3, names=col_names)
+    # Skip to line 77 where the data header starts
+    data_header_index = 76  # 0-based index for line 77
+    data_header = lines[data_header_index].strip().split('\t')
 
-    # Optionally, add background and calibration factor to the DataFrame if needed
-    # For example, as additional columns, or you could adjust based on your needs.
+    # Ensure data_header matches the provided keys
+    assert data_header == frame_data_keys + diode_data_keys[:len(data_header) - len(frame_data_keys)]
 
-    return data, background, calibration_factor
+    # Process each line of data after the headers
+    for line in lines[data_header_index + 2:]:  # Skip 'Background' and 'Calibration' lines
+        row_data = line.strip().split('\t')
+        if row_data[0] == 'Data:':  # Ensure we are reading a data line
+            # Split frame data and diode data based on the known structure
+            frame_row = row_data[1:len(frame_data_keys) + 1]
+            diode_row = row_data[len(frame_data_keys) + 1:]
+            frame_data.append(frame_row)
+            diode_data.append(diode_row)
+
+    # Convert lists to numpy arrays for easier manipulation later
+    frame_data = np.array(frame_data, dtype=float)
+    diode_data = np.array(diode_data, dtype=float)
+
+    return frame_data, diode_data
+
+
 
 def detector_arrays(acl_detectors):
     """
