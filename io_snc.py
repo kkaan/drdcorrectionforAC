@@ -20,17 +20,19 @@ def parse_arccheck_header(file_path):
         'Cols': None, 'CAX X': None, 'CAX Y': None, 'Device Position QA': None, 'Shift X': None,
         'Shift Y': None, 'Shift Z': None, 'Rotation X': None, 'Rotation Y': None, 'Rotation Z': None,
         'Manufacturer': None, 'Energy': None, 'Plug Present': None, 'Applied Angular': None,
-        'Applied Field Size': None, 'Applied Heterogeneity': None
+        'Applied Field Size': None, 'Applied Heterogeneity': None,
+        'Full Header Text': ''  # Initialize the key to store full header text
     }
 
     try:
         with open(file_path, 'r') as file:
             lines = file.readlines()
 
+        full_header_text = ""
         found_header = False
         for line in lines:
-            line = line.strip()
-            if line == "Background":  # New delimiter to stop parsing header
+            full_header_text += line  # Concatenate each line to the full header text
+            if line.strip() == "Background":  # New delimiter to stop parsing header
                 break
             key_value = line.split(':')
             if len(key_value) == 2:
@@ -38,6 +40,8 @@ def parse_arccheck_header(file_path):
                 if key in header_keys:
                     header_keys[key] = value
                     found_header = True
+
+        header_keys['Full Header Text'] = full_header_text.strip()  # Store the accumulated header text
 
         if not found_header:
             print("Warning: No valid header information found.")
@@ -57,21 +61,29 @@ def parse_arrays_from_file(file_path):
     with open(file_path, 'r') as file:
         lines = file.readlines()
 
+    # Define the exact names of arrays expected in the file
+    valid_arrays = [
+        'Background', 'Calibration Factors', 'Offset', 'Raw Counts', 'Corrected Counts',
+        'Dose Counts', 'Data Flags', 'Interpolated', 'Dose Interpolated',
+        'Corrected Counts (No Angular Correction)'
+    ]
+
     for line in lines:
-        if any(name in line for name in ['Background', 'Calibration Factors', 'Offset', 'Raw Counts', 'Corrected Counts',
-                                         'Dose Counts', 'Data Flags', 'Interpolated', 'Dose Interpolated',
-                                         'Corrected Counts (No Angular Correction)']):
+        line = line.strip()
+        # Check if the line matches any of the valid array names exactly
+        if line in valid_arrays:
             if current_array is not None:
                 # Handle conversion by ensuring all rows are the same length
                 max_length = max(len(row) for row in array_content)
                 uniform_content = [row + [None] * (max_length - len(row)) for row in array_content]
                 array_data[current_array] = np.array(uniform_content, dtype=object)  # Use dtype=object for mixed types
-            current_array = line.strip()
+            current_array = line
             array_content = []
-        elif current_array is not None:
+        elif current_array is not None:  # Continue capturing data if we're within an array
             parsed_line = line.split()
             array_content.append(parsed_line)
 
+    # Finalize the last array data capture
     if current_array is not None:
         max_length = max(len(row) for row in array_content)
         uniform_content = [row + [None] * (max_length - len(row)) for row in array_content]
@@ -85,16 +97,15 @@ def write_snc_txt_file(array_data, header_data, file_path):
 
     Parameters:
     - array_data (dict): Dictionary containing all the array data.
-    - header_data (dict): Dictionary containing all the header information.
+    - header_data (dict): Dictionary containing all the header information, including 'Full Header Text'.
     - file_path (str): Path to the file where the data should be saved.
     """
     try:
         with open(file_path, 'w') as file:
-            # Write the header information
-            for key, value in header_data.items():
-                if value is not None:
-                    file.write(f"{key}: {value}\n")
-            file.write("\n")  # End of header part
+            # Write the full header text directly from the header_data dictionary
+            if 'Full Header Text' in header_data:
+                file.write(header_data['Full Header Text'])
+                file.write("\n")  # Ensure there's a blank line after the header if not already present in 'Full Header Text'
 
             # Write each array
             for array_name, array_content in array_data.items():
