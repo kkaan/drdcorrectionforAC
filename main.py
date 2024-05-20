@@ -2,12 +2,13 @@ import numpy as np
 import io_snc
 import plots
 import corrections
+import pandas as pd
 
 # Read the detector files
 acml_file_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6X.acm'
 txt_file_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6X.txt'
 
-frame_data, diode_data, bkrnd_and_calibration_df = io_snc.parse_acm_file(acml_file_path)
+frame_data_df, diode_data_df, bkrnd_and_calibration_df = io_snc.parse_acm_file(acml_file_path)
 header_data = io_snc.parse_arccheck_header(txt_file_path)
 array_data = io_snc.parse_arrays_from_file(txt_file_path)
 
@@ -21,13 +22,13 @@ else:
     print("Failed to calculate intrinsic corrections.")
 
 # Apply the Jager Dose per Pulse to the differential raw counts corrected counts
-
+bkrnd_and_calibration_df = bkrnd_and_calibration_df.drop(bkrnd_and_calibration_df.index[0])
+background_df = pd.DataFrame([bkrnd_and_calibration_df['Background'].values]*len(diode_data_df), columns=diode_data_df.columns)
+diode_data_df = diode_data_df.subtract(background_df.values)
 
 
 file_path = 'output_snc_file.txt'
 io_snc.write_snc_txt_file(array_data, header_data, file_path)
-#TOFIX: This output of the .txt file is not working properly. The output file is not in the correct format.
-
 
 
 # Correct the counts for background and detector sensitivity calibration factor

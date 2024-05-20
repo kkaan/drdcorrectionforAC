@@ -129,10 +129,10 @@ import pandas as pd
 
 def parse_acm_file(file_path):
     frame_data_keys = [
-        'TYPE', 'UPDATE#', 'TIMETIC1', 'TIMETIC2', 'PULSES',
-        'STATUS1', 'STATUS2', 'VirtualInclinometer', 'CorrectedAngle', 'FieldSize'
+        'UPDATE#', 'TIMETIC1', 'TIMETIC2', 'PULSES',
+        'STATUS1', 'STATUS2', 'VirtualInclinometer', 'CorrectedAngle', 'FieldSize', 'Reference Diode'
     ]
-    diode_data_keys = ['Reference Diode'] + [str(i) for i in range(1, 1387)]  # 1368 diodes + reference diode
+    diode_data_keys = ['Reference Diode'] + [str(i) for i in range(1, 1387)]  # 1386 diodes
 
     # Initialize storage for frame data and diode data
     frame_data = []
@@ -144,9 +144,6 @@ def parse_acm_file(file_path):
     # Skip to line 77 where the data header starts
     data_header_index = 76  # 0-based index for line 77
     data_header = lines[data_header_index].strip().split('\t')
-
-    # Ensure data_header matches the provided keys
-    assert data_header == frame_data_keys + diode_data_keys[:len(data_header) - len(frame_data_keys)]
 
     # Extract Background and Calibration data
     background_data = lines[data_header_index + 1].strip().split('\t')[10:]  # Skip 'Background' line
@@ -173,7 +170,11 @@ def parse_acm_file(file_path):
     frame_data = np.array(frame_data, dtype=float)
     diode_data = np.array(diode_data, dtype=float)
 
-    return frame_data, diode_data, bkrnd_and_calibration_df
+    diode_data_keys = [str(i) for i in range(1, 1387)] # getting rid of the reference diodo key
+    frame_data_df = pd.DataFrame(frame_data, columns=frame_data_keys)
+    diode_data_df = pd.DataFrame(diode_data, columns=diode_data_keys)
+
+    return frame_data_df, diode_data_df, bkrnd_and_calibration_df
 
 
 def detector_arrays(acl_detectors):
@@ -236,5 +237,8 @@ def diode_numbers_in_snc_array():
 
     array = array.astype(int)
     return array
+
+
+
 
 #TODO: Add functionality to read in raw data from acl file and format it into the correct format.
