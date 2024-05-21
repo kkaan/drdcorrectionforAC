@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 def get_intrinsic_corrections(array_data):
     """
@@ -55,7 +56,7 @@ def get_intrinsic_corrections(array_data):
         return None
 
 
-def pulse_rate_correction(counts_accumulated_df, jager_pr_coefficients):
+def pulse_rate_correction(counts_accumulated_df, bkrnd_and_calibration_df, jager_pr_coefficients):
     """
     Corrects the count values in the dataframe using the Jager pulse rate correction coefficients.
 
@@ -72,12 +73,29 @@ def pulse_rate_correction(counts_accumulated_df, jager_pr_coefficients):
     count_df = counts_accumulated_df.diff()  # cGy
     count_df = count_df[1:]  # The first row will be NaN, drop the first row
 
+    # Extract background values from acm file
+    background_values = bkrnd_and_calibration_df['Background'].values.astype(float)
+    background_values = background_values[1:]  # Removes the reference detector value
+    background_values_series = pd.Series(background_values, index=count_df.columns)
+
+    # Subtract the background values from the diode data
+    count_df = count_df.subtract(background_values_series, axis='columns')
+
+    # Extract calibration values from acm file
+    calibration_values = bkrnd_and_calibration_df['Calibration'].values.astype(float)
+    calibration_values = calibration_values[1:]  # Removes the reference detector value
+    calibration_values_series = pd.Series(calibration_values, index=count_df.columns)
+
+    # Multiply the calibration values to the diode data
+    count_df = count_df.multiply(calibration_values_series, axis='columns')
+
     # Apply the correction factor formula
     jcf_pr_df = c - a * np.exp(-b * count_df)
-    pr_corrected_count_df = count_df * jcf_pr_df
-    return pr_corrected_count_df
+    pr_corrected_count_df = count_df / jcf_pr_df
+    pr_corrected_count_sum = pr_corrected_count_df.sum()
+    return pr_corrected_count_sum
 
-def dose_per_pulse_correction(counts_acummulated_df, jager_dpp_coefficients):
+def dose_per_pulse_correction(counts_acummulated_df, bkrnd_and_calibration_df, jager_dpp_coefficients):
     """
     Corrects the count values in the dataframe using the Jager dose per pulse correction coefficients.
 
@@ -94,7 +112,24 @@ def dose_per_pulse_correction(counts_acummulated_df, jager_dpp_coefficients):
     count_df = counts_acummulated_df.diff()  # cGy
     count_df = count_df[1:]  # The first row will be NaN, drop the first row
 
+    # Extract background values from acm file
+    background_values = bkrnd_and_calibration_df['Background'].values.astype(float)
+    background_values = background_values[1:]  # Removes the reference detector value
+    background_values_series = pd.Series(background_values, index=count_df.columns)
+
+    # Subtract the background values from the diode data
+    count_df = count_df.subtract(background_values_series, axis='columns')
+
+    # Extract calibration values from acm file
+    calibration_values = bkrnd_and_calibration_df['Calibration'].values.astype(float)
+    calibration_values = calibration_values[1:]  # Removes the reference detector value
+    calibration_values_series = pd.Series(calibration_values, index=count_df.columns)
+
+    # Multiply the calibration values to the diode data
+    count_df = count_df.multiply(calibration_values_series, axis='columns')
+
     # Apply the correction factor formula
     jcf_dpp_df = c - a * np.exp(-b * count_df)
-    dpp_corrected_count_df = count_df * jcf_dpp_df
-    return dpp_corrected_count_df
+    dpp_corrected_count_df = count_df / jcf_dpp_df
+    dpp_corrected_count_sum = dpp_corrected_count_df.sum()
+    return dpp_corrected_count_sum
