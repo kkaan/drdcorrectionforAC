@@ -24,19 +24,28 @@ else:
     print("Failed to calculate intrinsic corrections.")
 
 
-# Subtract the background from diode_data_df
-diode_data_df = diode_data_df.subtract(bkrnd_and_calibration_df.Background)
+# Extract background values from acm file
+background_values = bkrnd_and_calibration_df['Background'].values.astype(float)
+background_values = background_values[1:]  # Removes the reference detector value
+background_values_series = pd.Series(background_values, index=diode_data_df.columns)
 
-# Multiply the diode_data_df by the calibration factor
-diode_data_df = diode_data_df.multiply(bkrnd_and_calibration_df.Calibration)
+# Subtract the background values from the diode data
+diode_data_df = diode_data_df.subtract(background_values_series, axis='columns')
 
+# Extract calibration values from acm file
+calibration_values = bkrnd_and_calibration_df['Calibration'].values.astype(float)
+calibration_values = calibration_values[1:]  # Removes the reference detector value
+calibration_values_series = pd.Series(calibration_values, index=diode_data_df.columns)
+
+# Multiply the calibration values to the diode data
+diode_data_df = diode_data_df.multiply(calibration_values_series, axis='columns')
+
+# NOTE: The values in diode_data_df have been verified in excel
+# The values in diode_data_df are correct at this commit
 
 #file_path = 'output_snc_file.txt'
 #io_snc.write_snc_txt_file(array_data, header_data, file_path)
 
-
-# Correct the counts for background and detector sensitivity calibration factor
-diode_data_df = diode_data_df.subtract(background_df.values)
 
 # Dose per count calibration factor
 # TODO: Get dose per count calibration factor from acl file directly.
