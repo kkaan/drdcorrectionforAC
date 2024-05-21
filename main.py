@@ -23,9 +23,6 @@ if intrinsic_corrections is not None:
 else:
     print("Failed to calculate intrinsic corrections.")
 
-# NOTE: The values in counts_accumulated_df have been verified in excel
-# The values in counts_accumulated_df are correct at this commit
-
 #file_path = 'output_snc_file.txt'
 #io_snc.write_snc_txt_file(array_data, header_data, file_path)
 
@@ -57,6 +54,8 @@ dose_per_count: float = 7.7597E-06  # cGy/count
 # Calculate the dose values
 pr_corrected_dose_df = pr_corrected_count_sum * dose_per_count
 dpp_corrected_dose_df = dpp_corrected_count_sum * dose_per_count
+
+
 
 # Create a new DataFrame
 corrected_dose_df = pd.DataFrame({
