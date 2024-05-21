@@ -13,7 +13,9 @@ header_data = io_snc.parse_arccheck_header(txt_file_path)
 array_data = io_snc.parse_arrays_from_file(txt_file_path)
 
 
-# Assuming 'arrays' is the dictionary loaded with your data
+# Get the intrinsic corrections from the txt file. This is the field size and angular correction applied
+# by the SNC Patient software. This will be used at the end after we've calculated the dose rate corrected
+# array of dose values we obtain from acm file.
 intrinsic_corrections = corrections.get_intrinsic_corrections(array_data)
 if intrinsic_corrections is not None:
     print("Intrinsic Corrections Array:")
@@ -21,18 +23,20 @@ if intrinsic_corrections is not None:
 else:
     print("Failed to calculate intrinsic corrections.")
 
-# Apply the Jager Dose per Pulse to the differential raw counts corrected counts
-bkrnd_and_calibration_df = bkrnd_and_calibration_df.drop(bkrnd_and_calibration_df.index[0])
-background_df = pd.DataFrame([bkrnd_and_calibration_df['Background'].values]*len(diode_data_df), columns=diode_data_df.columns)
-diode_data_df = diode_data_df.subtract(background_df.values)
+
+# Subtract the background from diode_data_df
+diode_data_df = diode_data_df.subtract(bkrnd_and_calibration_df.Background)
+
+# Multiply the diode_data_df by the calibration factor
+diode_data_df = diode_data_df.multiply(bkrnd_and_calibration_df.Calibration)
 
 
-file_path = 'output_snc_file.txt'
-io_snc.write_snc_txt_file(array_data, header_data, file_path)
+#file_path = 'output_snc_file.txt'
+#io_snc.write_snc_txt_file(array_data, header_data, file_path)
 
 
 # Correct the counts for background and detector sensitivity calibration factor
-counts_accumulated_df = (data_df - background) * calibration_factor
+diode_data_df = diode_data_df.subtract(background_df.values)
 
 # Dose per count calibration factor
 # TODO: Get dose per count calibration factor from acl file directly.

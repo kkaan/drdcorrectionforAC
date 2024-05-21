@@ -55,7 +55,7 @@ def get_intrinsic_corrections(array_data):
         return None
 
 
-def pulse_rate_correction(counts_acummulated_df, jager_pr_coefficients):
+def pulse_rate_correction(counts_accumulated_df, jager_pr_coefficients):
     """
     Corrects the count values in the dataframe using the Jager pulse rate correction coefficients.
 
@@ -69,7 +69,7 @@ def pulse_rate_correction(counts_acummulated_df, jager_pr_coefficients):
     a, b, c = jager_pr_coefficients
 
     # Calculate the count rate
-    count_df = counts_acummulated_df.diff()  # cGy
+    count_df = counts_accumulated_df.diff()  # cGy
     count_df = count_df[1:]  # The first row will be NaN, drop the first row
 
     # Apply the correction factor formula
