@@ -2,9 +2,10 @@
 #               It also rearranges the detector data from the acl file into the one displayed in SNC Patient.
 #               The detector data is then saved as a .npz file.
 # NOTE: Currently only takes in pre-formatted interim tab delimited file.
-import pandas as pd
+
 import numpy as np
 import os
+import pandas as pd
 
 def parse_arccheck_header(file_path):
     if not os.path.exists(file_path):
@@ -124,9 +125,6 @@ def write_snc_txt_file(array_data, header_data, file_path):
     except Exception as e:
         print(f"An error occurred while writing to file: {e}")
 
-
-import pandas as pd
-
 def parse_acm_file(file_path):
     frame_data_keys = [
         'UPDATE#', 'TIMETIC1', 'TIMETIC2', 'PULSES',
@@ -175,7 +173,6 @@ def parse_acm_file(file_path):
     diode_data_df = pd.DataFrame(diode_data, columns=diode_data_keys)
 
     return frame_data_df, diode_data_df, bkrnd_and_calibration_df
-
 
 def detector_arrays(acl_detectors):
     """
