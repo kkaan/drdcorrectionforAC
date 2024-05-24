@@ -163,7 +163,7 @@ def main():
     array_data_to_write = array_data.copy()
     dose_counts = array_data_to_write['Dose Counts']
     array_data_to_write['Dose Counts'] = insert_modified_dose_counts(corrected_dose_array[1], dose_counts)
-    io_snc.write_snc_txt_file(array_data_to_write, header_data, 'corrected_file.txt')
+    io_snc.write_snc_txt_file(array_data_to_write, header_data, '../corrected_file.txt')
     # For plotting:
     dose_df, dose_accumulated_df, dose_rate_df, dose_rate_arrays = calculate_dose_values(
         counts_accumulated_df, dose_per_count)
