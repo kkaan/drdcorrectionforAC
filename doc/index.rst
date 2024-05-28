@@ -10,11 +10,6 @@ Welcome to Dose Rate Dependency Correction for SNC ArcChecks's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   modules
-   corrections
-   io_snc
-   main
-
 Indices and tables
 ==================
 
