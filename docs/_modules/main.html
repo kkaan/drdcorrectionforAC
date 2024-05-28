@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>main &mdash; Dose Rate Dependency Correction for SNC ArcChecks 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Dose Rate Dependency Correction for SNC ArcChecks
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../corrections.html">corrections module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../io_snc.html">io_snc module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../main.html">main module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Dose Rate Dependency Correction for SNC ArcChecks</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">main</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for main</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">io_snc</span>
+<span class="kn">import</span> <span class="nn">plots</span>
+<span class="kn">import</span> <span class="nn">corrections</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="c1"># Configuration</span>
+<span class="n">acml_file_path</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6X.acm&#39;</span>
+<span class="n">txt_file_path</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6X.txt&#39;</span>
+
+<span class="c1"># TODO: Get dose per count calibration factor from acl file directly.</span>
+<span class="n">dose_per_count</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">7.7597E-06</span>  <span class="c1"># cGy/count</span>
+
+
+<div class="viewcode-block" id="read_files">
+<a class="viewcode-back" href="../main.html#main.read_files">[docs]</a>
+<span class="k">def</span> <span class="nf">read_files</span><span class="p">(</span><span class="n">acml_path</span><span class="p">,</span> <span class="n">txt_path</span><span class="p">):</span>
+    <span class="n">frame_data_df</span><span class="p">,</span> <span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span> <span class="o">=</span> <span class="n">io_snc</span><span class="o">.</span><span class="n">parse_acm_file</span><span class="p">(</span><span class="n">acml_path</span><span class="p">)</span>
+    <span class="n">header_data</span> <span class="o">=</span> <span class="n">io_snc</span><span class="o">.</span><span class="n">parse_arccheck_header</span><span class="p">(</span><span class="n">txt_path</span><span class="p">)</span>
+    <span class="n">array_data</span> <span class="o">=</span> <span class="n">io_snc</span><span class="o">.</span><span class="n">parse_arrays_from_file</span><span class="p">(</span><span class="n">txt_path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">frame_data_df</span><span class="p">,</span> <span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span> <span class="n">header_data</span><span class="p">,</span> <span class="n">array_data</span></div>
+
+
+<div class="viewcode-block" id="apply_jager_corrections">
+<a class="viewcode-back" href="../main.html#main.apply_jager_corrections">[docs]</a>
+<span class="k">def</span> <span class="nf">apply_jager_corrections</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span> <span class="n">intrinsic_corrections</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply Jager pulse rate and dose per pulse corrections.&quot;&quot;&quot;</span>
+    <span class="n">a_pr</span><span class="p">,</span> <span class="n">b_pr</span><span class="p">,</span> <span class="n">c_pr</span> <span class="o">=</span> <span class="mf">0.035</span><span class="p">,</span> <span class="mf">5.21</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span>
+    <span class="n">jager_pr_coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">a_pr</span><span class="p">,</span> <span class="n">b_pr</span><span class="p">,</span> <span class="n">c_pr</span><span class="p">])</span>
+
+    <span class="n">a_dpp</span><span class="p">,</span> <span class="n">b_dpp</span><span class="p">,</span> <span class="n">c_dpp</span> <span class="o">=</span> <span class="mf">0.0978</span><span class="p">,</span> <span class="mf">3.33</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mf">1.011</span>
+    <span class="n">jager_dpp_coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">a_dpp</span><span class="p">,</span> <span class="n">b_dpp</span><span class="p">,</span> <span class="n">c_dpp</span><span class="p">])</span>
+
+    <span class="n">pr_corrected_count_sum</span> <span class="o">=</span> <span class="n">corrections</span><span class="o">.</span><span class="n">pulse_rate_correction</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span>
+                                                               <span class="n">jager_pr_coefficients</span><span class="p">)</span>
+    <span class="n">dpp_corrected_count_sum</span> <span class="o">=</span> <span class="n">corrections</span><span class="o">.</span><span class="n">dose_per_pulse_correction</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span>
+                                                                    <span class="n">jager_dpp_coefficients</span><span class="p">)</span>
+
+    <span class="c1"># Create a new DataFrame</span>
+    <span class="n">corrected_count</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+        <span class="s1">&#39;pr_corrected_dose_df&#39;</span><span class="p">:</span> <span class="n">pr_corrected_count_sum</span><span class="p">,</span>
+        <span class="s1">&#39;dpp_corrected_dose_df&#39;</span><span class="p">:</span> <span class="n">dpp_corrected_count_sum</span>
+    <span class="p">})</span>
+
+    <span class="c1"># In the format of the SNC txt file</span>
+    <span class="n">corrected_count_array</span> <span class="o">=</span> <span class="n">io_snc</span><span class="o">.</span><span class="n">detector_arrays</span><span class="p">(</span><span class="n">corrected_count</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+    <span class="c1"># Apply intrinsic corrections if provided</span>
+    <span class="k">if</span> <span class="n">intrinsic_corrections</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">numeric_intrinsic</span> <span class="o">=</span> <span class="n">intrinsic_corrections</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">:]</span>
+        <span class="n">numeric_intrinsic</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">numeric_intrinsic</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">corrected_count_array</span> <span class="o">*=</span> <span class="n">numeric_intrinsic</span>
+
+    <span class="k">return</span> <span class="n">corrected_count_array</span></div>
+
+
+
+<div class="viewcode-block" id="generate_plots">
+<a class="viewcode-back" href="../main.html#main.generate_plots">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_plots</span><span class="p">(</span><span class="n">dose_rate_arrays</span><span class="p">,</span> <span class="n">dose_df</span><span class="p">,</span> <span class="n">dose_rate_df</span><span class="p">,</span> <span class="n">dose_accumulated_df</span><span class="p">,</span> <span class="n">startframe</span><span class="p">,</span> <span class="n">endframe</span><span class="p">,</span> <span class="n">detector_number</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate plots and animations.&quot;&quot;&quot;</span>
+
+    <span class="n">xn</span><span class="p">,</span> <span class="n">yn</span> <span class="o">=</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">15</span>
+    <span class="n">diode_numbers_in_snc_array</span> <span class="o">=</span> <span class="n">io_snc</span><span class="o">.</span><span class="n">diode_numbers_in_snc_array</span><span class="p">()</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">32.5</span><span class="p">,</span> <span class="mi">33</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mf">10.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">diode_numbers_in_snc_array</span> <span class="o">==</span> <span class="n">detector_number</span><span class="p">)</span>
+    <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">col</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">half_xn</span> <span class="o">=</span> <span class="n">xn</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">half_yn</span> <span class="o">=</span> <span class="n">yn</span> <span class="o">//</span> <span class="mi">2</span>
+
+    <span class="n">start_row</span> <span class="o">=</span> <span class="n">row</span> <span class="o">-</span> <span class="n">half_yn</span> <span class="k">if</span> <span class="n">row</span> <span class="o">-</span> <span class="n">half_yn</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">row</span>
+    <span class="n">end_row</span> <span class="o">=</span> <span class="n">row</span> <span class="o">+</span> <span class="n">half_yn</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">row</span> <span class="o">+</span> <span class="n">half_yn</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">diode_numbers_in_snc_array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="n">row</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">start_col</span> <span class="o">=</span> <span class="n">col</span> <span class="o">-</span> <span class="n">half_xn</span> <span class="k">if</span> <span class="n">col</span> <span class="o">-</span> <span class="n">half_xn</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">col</span>
+    <span class="n">end_col</span> <span class="o">=</span> <span class="n">col</span> <span class="o">+</span> <span class="n">half_xn</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">col</span> <span class="o">+</span> <span class="n">half_xn</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">diode_numbers_in_snc_array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span> <span class="n">col</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="n">selected_dose_rate_arrays</span> <span class="o">=</span> <span class="n">dose_rate_arrays</span><span class="p">[</span><span class="n">startframe</span><span class="p">:</span><span class="n">endframe</span><span class="p">,</span> <span class="n">start_row</span><span class="p">:</span><span class="n">end_row</span><span class="p">,</span> <span class="n">start_col</span><span class="p">:</span><span class="n">end_col</span><span class="p">]</span>
+    <span class="n">selected_X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">start_col</span><span class="p">:</span><span class="n">end_col</span><span class="p">]</span>
+    <span class="n">selected_Y</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">start_row</span><span class="p">:</span><span class="n">end_row</span><span class="p">]</span>
+
+    <span class="n">plots</span><span class="o">.</span><span class="n">create_animation</span><span class="p">(</span><span class="n">dose_rate_arrays</span><span class="p">,</span> <span class="n">xn</span><span class="p">,</span> <span class="n">yn</span><span class="p">,</span> <span class="n">detector_number</span><span class="p">)</span>
+    <span class="n">plots</span><span class="o">.</span><span class="n">scatter_cumulative_dose</span><span class="p">(</span><span class="n">dose_rate_df</span><span class="p">[</span><span class="n">startframe</span><span class="p">:</span><span class="n">endframe</span><span class="p">],</span> <span class="n">dose_accumulated_df</span><span class="p">[</span><span class="n">startframe</span><span class="p">:</span><span class="n">endframe</span><span class="p">],</span>
+                                  <span class="n">detector_number</span><span class="p">)</span>
+    <span class="n">plots</span><span class="o">.</span><span class="n">bar_doserate_histogram</span><span class="p">(</span><span class="n">dose_df</span><span class="p">,</span> <span class="n">dose_rate_df</span><span class="p">,</span> <span class="p">[</span><span class="mi">630</span><span class="p">,</span> <span class="mi">610</span><span class="p">,</span> <span class="mi">590</span><span class="p">,</span> <span class="mi">570</span><span class="p">,</span> <span class="mi">550</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="calculate_dose_values">
+<a class="viewcode-back" href="../main.html#main.calculate_dose_values">[docs]</a>
+<span class="k">def</span> <span class="nf">calculate_dose_values</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">dose_per_count</span><span class="p">):</span>
+    <span class="c1"># Calculate the dose values</span>
+    <span class="c1"># Dose per count calibration factor</span>
+
+    <span class="c1"># Calculate the dose values</span>
+    <span class="n">dose_accumulated_df</span> <span class="o">=</span> <span class="n">counts_accumulated_df</span> <span class="o">*</span> <span class="n">dose_per_count</span>  <span class="c1"># cGy</span>
+
+    <span class="c1"># Calculate the difference between current row and previous row</span>
+    <span class="n">dose_df</span> <span class="o">=</span> <span class="n">dose_accumulated_df</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span>  <span class="c1"># cGy</span>
+    <span class="n">dose_df</span> <span class="o">=</span> <span class="n">dose_df</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>  <span class="c1"># The first row will be NaN, drop the first row</span>
+    <span class="n">dose_accumulated_df</span> <span class="o">=</span> <span class="n">dose_accumulated_df</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>  <span class="c1"># Matching the length of dose_df</span>
+
+    <span class="c1"># Calculate the dose rate values</span>
+    <span class="c1"># Assuming the time interval between each frame is 50 ms</span>
+    <span class="n">time_interval</span> <span class="o">=</span> <span class="mi">50</span> <span class="o">/</span> <span class="mi">60000</span>  <span class="c1"># in minutes</span>
+    <span class="n">dose_rate_df</span> <span class="o">=</span> <span class="n">dose_df</span> <span class="o">/</span> <span class="n">time_interval</span>  <span class="c1"># cGy/min</span>
+
+    <span class="c1"># Create a ndarray of detector arrays arranged in the SNC Patient display configuration</span>
+    <span class="c1"># Each array represents a frame of the detector array at a specific time point</span>
+    <span class="n">dose_rate_arrays</span> <span class="o">=</span> <span class="n">io_snc</span><span class="o">.</span><span class="n">detector_arrays</span><span class="p">(</span><span class="n">dose_rate_df</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dose_df</span><span class="p">,</span> <span class="n">dose_accumulated_df</span><span class="p">,</span> <span class="n">dose_rate_df</span><span class="p">,</span> <span class="n">dose_rate_arrays</span></div>
+
+
+
+<div class="viewcode-block" id="snc_format_array">
+<a class="viewcode-back" href="../main.html#main.snc_format_array">[docs]</a>
+<span class="k">def</span> <span class="nf">snc_format_array</span><span class="p">(</span><span class="n">corrected_count_array</span><span class="p">,</span> <span class="n">formatted_counts</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Formats the array to be compatible with the SNC measured txt file.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    corrected_count_array (numpy.ndarray): The array containing corrected dose values.</span>
+<span class="sd">    formatted_counts (numpy.ndarray): The array containing the counts with positional data directly from measured file.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    numpy.ndarray: Corrected values in format ready for insertion into SNC txt file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Convert corrected_array values to strings with 16 digits</span>
+    <span class="n">corrected_array_str</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="s2">&quot;</span><span class="si">{:.15f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">row</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">corrected_count_array</span><span class="p">])</span>
+
+    <span class="c1"># Insert corrected_dose_array_str into new_dose_counts while preserving positional data</span>
+    <span class="n">formatted_counts</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">42</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">133</span><span class="p">]</span> <span class="o">=</span> <span class="n">corrected_array_str</span>
+
+    <span class="k">return</span> <span class="n">formatted_counts</span></div>
+
+
+
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../main.html#main.main">[docs]</a>
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># Read the necessary files and parse the data</span>
+    <span class="p">(</span><span class="n">frame_data_df</span><span class="p">,</span> <span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span>
+     <span class="n">header_data</span><span class="p">,</span> <span class="n">array_data</span><span class="p">)</span> <span class="o">=</span> <span class="n">read_files</span><span class="p">(</span><span class="n">acml_file_path</span><span class="p">,</span> <span class="n">txt_file_path</span><span class="p">)</span>
+
+    <span class="c1"># Get the intrinsic corrections from the parsed array data</span>
+    <span class="c1"># The intrinsic corrections represent the field size and angular correction applied by the SNC Patient software</span>
+    <span class="n">intrinsic_corrections</span> <span class="o">=</span> <span class="n">corrections</span><span class="o">.</span><span class="n">get_intrinsic_corrections</span><span class="p">(</span><span class="n">array_data</span><span class="p">)</span>
+
+    <span class="c1"># Apply the Jager pulse rate and dose per pulse corrections to the accumulated counts</span>
+    <span class="n">corrected_count_array</span> <span class="o">=</span> <span class="n">apply_jager_corrections</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">)</span>
+
+    <span class="c1"># Make a copy of the original array data</span>
+    <span class="n">array_data_to_write</span> <span class="o">=</span> <span class="n">array_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># Format the corrected count array to be compatible with the SNC measured txt file</span>
+    <span class="c1"># The corrected count array is inserted into the &#39;Corrected Counts&#39; field of the copied array data</span>
+    <span class="n">array_data_to_write</span><span class="p">[</span><span class="s1">&#39;Corrected Counts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">snc_format_array</span><span class="p">(</span><span class="n">corrected_count_array</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                               <span class="n">array_data_to_write</span><span class="p">[</span><span class="s1">&#39;Corrected Counts&#39;</span><span class="p">])</span>
+
+    <span class="c1"># Write the corrected array data to a new .txt file</span>
+    <span class="c1"># The header data and the name of the new file (&#39;corrected_file.txt&#39;) are also provided</span>
+    <span class="n">io_snc</span><span class="o">.</span><span class="n">write_snc_txt_file</span><span class="p">(</span><span class="n">array_data_to_write</span><span class="p">,</span> <span class="n">header_data</span><span class="p">,</span> <span class="s1">&#39;corrected_file.txt&#39;</span><span class="p">)</span></div>
+
+
+    <span class="c1"># # For plotting:</span>
+    <span class="c1"># dose_df, dose_accumulated_df, dose_rate_df, dose_rate_arrays = calculate_dose_values(</span>
+    <span class="c1">#     counts_accumulated_df, dose_per_count)</span>
+    <span class="c1">#</span>
+    <span class="c1"># generate_plots(dose_rate_arrays, dose_df, dose_rate_df, dose_accumulated_df,</span>
+    <span class="c1">#                startframe=1550, endframe=1600,</span>
+    <span class="c1">#                detector_number=610)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+
+<span class="c1"># TODO: Create a function to put the corrected dose values back into the .txt file</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Kaan.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
