@@ -46,7 +46,7 @@ def get_instrinsic_corrections(array_data):
     return intrinsic_corrections
 
 
-def apply_jager_corrections(counts_accumulated_df, bkrnd_and_calibration_df, dose_per_count):
+def apply_jager_corrections(counts_accumulated_df, bkrnd_and_calibration_df, intrinsic_corrections):
     """Apply Jager pulse rate and dose per pulse corrections."""
     a_pr, b_pr, c_pr = 0.035, 5.21 * 10 ** -5, 1
     jager_pr_coefficients = np.array([a_pr, b_pr, c_pr])
@@ -59,21 +59,20 @@ def apply_jager_corrections(counts_accumulated_df, bkrnd_and_calibration_df, dos
     dpp_corrected_count_sum = corrections.dose_per_pulse_correction(counts_accumulated_df, bkrnd_and_calibration_df,
                                                                     jager_dpp_coefficients)
 
-    pr_corrected_dose_df = pr_corrected_count_sum * dose_per_count
-    dpp_corrected_dose_df = dpp_corrected_count_sum * dose_per_count
-
     # Create a new DataFrame
-    corrected_dose_df = pd.DataFrame({
-        'pr_corrected_dose_df': pr_corrected_dose_df,
-        'dpp_corrected_dose_df': dpp_corrected_dose_df
+    corrected_count = pd.DataFrame({
+        'pr_corrected_dose_df': pr_corrected_count_sum,
+        'dpp_corrected_dose_df': dpp_corrected_count_sum
     })
 
     # In the format of the SNC txt file
-    corrected_dose_array = io_snc.detector_arrays(corrected_dose_df.T)
-    #TODO: Intrincic corrections need to be applied here.
+    corrected_count_array = io_snc.detector_arrays(corrected_count.T)
 
-    print(corrected_dose_array)
-    return corrected_dose_array
+    #TODO: Intrincic corrections need to be applied here.
+    C
+
+    print(corrected_count_array)
+    return corrected_count_array
 
 
 def generate_plots(dose_rate_arrays, dose_df, dose_rate_df, dose_accumulated_df, startframe, endframe, detector_number):
@@ -129,48 +128,47 @@ def calculate_dose_values(counts_accumulated_df, dose_per_count):
     return dose_df, dose_accumulated_df, dose_rate_df, dose_rate_arrays
 
 
-def insert_modified_dose_counts(corrected_dose_array, dose_counts):
+def snc_format_array(corrected_count_array, formatted_counts):
     """
-    Inserts corrected dose values into the dose counts array while preserving positional data.
+    Formats the array to be compatible with the SNC measured txt file.
 
     Parameters:
-    corrected_dose_array (numpy.ndarray): The array containing corrected dose values.
-    dose_counts (numpy.ndarray): The array containing the dose counts with positional data.
+    corrected_count_array (numpy.ndarray): The array containing corrected dose values.
+    formatted_counts (numpy.ndarray): The array containing the counts with positional data directly from measured file.
 
     Returns:
-    numpy.ndarray: The modified dose counts array with the corrected dose values inserted.
+    numpy.ndarray: Corrected values in format ready for insertion into SNC txt file.
     """
-    # Convert corrected_dose_array values to strings with 16 digits
-    corrected_dose_array_str = np.array([["{:.15f}".format(value) for value in row] for row in corrected_dose_array])
-
-    # Create a new array to hold the modified data
-    new_dose_counts = np.copy(dose_counts)
+    # Convert corrected_array values to strings with 16 digits
+    corrected_array_str = np.array([["{:.15f}".format(value) for value in row] for row in corrected_count_array])
 
     # Insert corrected_dose_array_str into new_dose_counts while preserving positional data
-    new_dose_counts[1:42, 2:133] = corrected_dose_array_str
+    formatted_counts[1:42, 2:133] = corrected_array_str
 
-    return new_dose_counts
+    return formatted_counts
 
 
 def main():
-    frame_data_df, counts_accumulated_df, bkrnd_and_calibration_df, header_data, array_data = read_files(acml_file_path,
-                                                                                                         txt_file_path)
+    (frame_data_df, counts_accumulated_df, bkrnd_and_calibration_df,
+     header_data, array_data) = read_files(acml_file_path, txt_file_path)
     intrinsic_corrections = get_instrinsic_corrections(array_data)
+    corrected_count_array = apply_jager_corrections(counts_accumulated_df, bkrnd_and_calibration_df, intrinsic_corrections)
 
-    corrected_dose_array = apply_jager_corrections(counts_accumulated_df, bkrnd_and_calibration_df, dose_per_count)
+    #TODO: Correct with instrinsic corrections
 
-    #TODO: write corrected_dose_arrays to a new SNC readable .txt file
     array_data_to_write = array_data.copy()
-    dose_counts = array_data_to_write['Dose Counts']
-    array_data_to_write['Dose Counts'] = insert_modified_dose_counts(corrected_dose_array[1], dose_counts)
-    io_snc.write_snc_txt_file(array_data_to_write, header_data, '../corrected_file.txt')
-    # For plotting:
-    dose_df, dose_accumulated_df, dose_rate_df, dose_rate_arrays = calculate_dose_values(
-        counts_accumulated_df, dose_per_count)
+    array_data_to_write['Corrected Counts'] = snc_format_array(corrected_count_array[1],
+                                                                     array_data_to_write['Corrected Counts'])
+    io_snc.write_snc_txt_file(array_data_to_write, header_data, 'corrected_file.txt')
 
-    generate_plots(dose_rate_arrays, dose_df, dose_rate_df, dose_accumulated_df,
-                   startframe=1550, endframe=1600,
-                   detector_number=610)
+
+    # # For plotting:
+    # dose_df, dose_accumulated_df, dose_rate_df, dose_rate_arrays = calculate_dose_values(
+    #     counts_accumulated_df, dose_per_count)
+    #
+    # generate_plots(dose_rate_arrays, dose_df, dose_rate_df, dose_accumulated_df,
+    #                startframe=1550, endframe=1600,
+    #                detector_number=610)
 
 
 if __name__ == "__main__":
