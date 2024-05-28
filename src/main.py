@@ -153,7 +153,7 @@ def main():
     # generate_plots(dose_rate_arrays, dose_df, dose_rate_df, dose_accumulated_df,
     #                startframe=1550, endframe=1600,
     #                detector_number=610)
-    # Doc push
+
 
 if __name__ == "__main__":
     main()
