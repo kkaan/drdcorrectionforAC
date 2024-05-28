@@ -20,7 +20,8 @@
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="modules.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -42,12 +43,15 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <!-- Local TOC -->
-              <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">Welcome to Dose Rate Dependency Correction for SNC ArcChecks’s documentation!</a></li>
-<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="corrections.html">corrections module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="io_snc.html">io_snc module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="main.html">main module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotdiodecounts.html">plotdiodecounts module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plots.html">plots module</a></li>
 </ul>
-</div>
+
         </div>
       </div>
     </nav>
@@ -75,6 +79,40 @@
   <section id="welcome-to-dose-rate-dependency-correction-for-snc-arcchecks-s-documentation">
 <h1>Welcome to Dose Rate Dependency Correction for SNC ArcChecks’s documentation!<a class="headerlink" href="#welcome-to-dose-rate-dependency-correction-for-snc-arcchecks-s-documentation" title="Link to this heading"></a></h1>
 <div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="corrections.html">corrections module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="corrections.html#corrections.dose_per_pulse_correction"><code class="docutils literal notranslate"><span class="pre">dose_per_pulse_correction()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="corrections.html#corrections.get_intrinsic_corrections"><code class="docutils literal notranslate"><span class="pre">get_intrinsic_corrections()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="corrections.html#corrections.pulse_rate_correction"><code class="docutils literal notranslate"><span class="pre">pulse_rate_correction()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="io_snc.html">io_snc module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="io_snc.html#io_snc.detector_arrays"><code class="docutils literal notranslate"><span class="pre">detector_arrays()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="io_snc.html#io_snc.diode_numbers_in_snc_array"><code class="docutils literal notranslate"><span class="pre">diode_numbers_in_snc_array()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="io_snc.html#io_snc.parse_acm_file"><code class="docutils literal notranslate"><span class="pre">parse_acm_file()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="io_snc.html#io_snc.parse_arccheck_header"><code class="docutils literal notranslate"><span class="pre">parse_arccheck_header()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="io_snc.html#io_snc.parse_arrays_from_file"><code class="docutils literal notranslate"><span class="pre">parse_arrays_from_file()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="io_snc.html#io_snc.write_snc_txt_file"><code class="docutils literal notranslate"><span class="pre">write_snc_txt_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="main.html">main module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="main.html#main.apply_jager_corrections"><code class="docutils literal notranslate"><span class="pre">apply_jager_corrections()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="main.html#main.calculate_dose_values"><code class="docutils literal notranslate"><span class="pre">calculate_dose_values()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="main.html#main.generate_plots"><code class="docutils literal notranslate"><span class="pre">generate_plots()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="main.html#main.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="main.html#main.read_files"><code class="docutils literal notranslate"><span class="pre">read_files()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="main.html#main.snc_format_array"><code class="docutils literal notranslate"><span class="pre">snc_format_array()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="plotdiodecounts.html">plotdiodecounts module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plots.html">plots module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="plots.html#plots.bar_doserate_histogram"><code class="docutils literal notranslate"><span class="pre">bar_doserate_histogram()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="plots.html#plots.create_animation"><code class="docutils literal notranslate"><span class="pre">create_animation()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="plots.html#plots.scatter_cumulative_dose"><code class="docutils literal notranslate"><span class="pre">scatter_cumulative_dose()</span></code></a></li>
+</ul>
+</li>
+</ul>
 </div>
 </section>
 <section id="indices-and-tables">
@@ -89,7 +127,9 @@
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 
