@@ -97,40 +97,9 @@
     <span class="k">return</span> <span class="n">frame_data_df</span><span class="p">,</span> <span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span> <span class="n">header_data</span><span class="p">,</span> <span class="n">array_data</span></div>
 
 
-
-<div class="viewcode-block" id="get_instrinsic_corrections">
-<a class="viewcode-back" href="../main.html#main.get_instrinsic_corrections">[docs]</a>
-<span class="k">def</span> <span class="nf">get_instrinsic_corrections</span><span class="p">(</span><span class="n">array_data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Retrieves the intrinsic corrections from the provided array data. These corrections represent the field size and</span>
-<span class="sd">    angular correction applied by the SNC Patient software.</span>
-
-<span class="sd">    The intrinsic corrections are used at the end of the dose rate correction process, after the dose rate dependency</span>
-<span class="sd">    corrected array of dose values has been calculated from the acm file.</span>
-
-<span class="sd">    Parameters:</span>
-<span class="sd">    array_data (ndarray): The array data from which to extract the intrinsic corrections.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">    intrinsic_corrections (ndarray or None): The intrinsic corrections array if successful, None otherwise.</span>
-
-<span class="sd">    Prints:</span>
-<span class="sd">    If successful, prints the intrinsic corrections array.</span>
-<span class="sd">    If unsuccessful, prints a failure message.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">intrinsic_corrections</span> <span class="o">=</span> <span class="n">corrections</span><span class="o">.</span><span class="n">get_intrinsic_corrections</span><span class="p">(</span><span class="n">array_data</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">intrinsic_corrections</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Intrinsic Corrections Array:&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">intrinsic_corrections</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed to calculate intrinsic corrections.&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">intrinsic_corrections</span></div>
-
-
-
 <div class="viewcode-block" id="apply_jager_corrections">
 <a class="viewcode-back" href="../main.html#main.apply_jager_corrections">[docs]</a>
-<span class="k">def</span> <span class="nf">apply_jager_corrections</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span> <span class="n">dose_per_count</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">apply_jager_corrections</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span> <span class="n">intrinsic_corrections</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply Jager pulse rate and dose per pulse corrections.&quot;&quot;&quot;</span>
     <span class="n">a_pr</span><span class="p">,</span> <span class="n">b_pr</span><span class="p">,</span> <span class="n">c_pr</span> <span class="o">=</span> <span class="mf">0.035</span><span class="p">,</span> <span class="mf">5.21</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span>
     <span class="n">jager_pr_coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">a_pr</span><span class="p">,</span> <span class="n">b_pr</span><span class="p">,</span> <span class="n">c_pr</span><span class="p">])</span>
@@ -143,21 +112,22 @@
     <span class="n">dpp_corrected_count_sum</span> <span class="o">=</span> <span class="n">corrections</span><span class="o">.</span><span class="n">dose_per_pulse_correction</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span>
                                                                     <span class="n">jager_dpp_coefficients</span><span class="p">)</span>
 
-    <span class="n">pr_corrected_dose_df</span> <span class="o">=</span> <span class="n">pr_corrected_count_sum</span> <span class="o">*</span> <span class="n">dose_per_count</span>
-    <span class="n">dpp_corrected_dose_df</span> <span class="o">=</span> <span class="n">dpp_corrected_count_sum</span> <span class="o">*</span> <span class="n">dose_per_count</span>
-
     <span class="c1"># Create a new DataFrame</span>
-    <span class="n">corrected_dose_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
-        <span class="s1">&#39;pr_corrected_dose_df&#39;</span><span class="p">:</span> <span class="n">pr_corrected_dose_df</span><span class="p">,</span>
-        <span class="s1">&#39;dpp_corrected_dose_df&#39;</span><span class="p">:</span> <span class="n">dpp_corrected_dose_df</span>
+    <span class="n">corrected_count</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+        <span class="s1">&#39;pr_corrected_dose_df&#39;</span><span class="p">:</span> <span class="n">pr_corrected_count_sum</span><span class="p">,</span>
+        <span class="s1">&#39;dpp_corrected_dose_df&#39;</span><span class="p">:</span> <span class="n">dpp_corrected_count_sum</span>
     <span class="p">})</span>
 
     <span class="c1"># In the format of the SNC txt file</span>
-    <span class="n">corrected_dose_array</span> <span class="o">=</span> <span class="n">io_snc</span><span class="o">.</span><span class="n">detector_arrays</span><span class="p">(</span><span class="n">corrected_dose_df</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-    <span class="c1">#TODO: Intrincic corrections need to be applied here.</span>
+    <span class="n">corrected_count_array</span> <span class="o">=</span> <span class="n">io_snc</span><span class="o">.</span><span class="n">detector_arrays</span><span class="p">(</span><span class="n">corrected_count</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="n">corrected_dose_array</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">corrected_dose_array</span></div>
+    <span class="c1"># Apply intrinsic corrections if provided</span>
+    <span class="k">if</span> <span class="n">intrinsic_corrections</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">numeric_intrinsic</span> <span class="o">=</span> <span class="n">intrinsic_corrections</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">:]</span>
+        <span class="n">numeric_intrinsic</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">numeric_intrinsic</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">corrected_count_array</span> <span class="o">*=</span> <span class="n">numeric_intrinsic</span>
+
+    <span class="k">return</span> <span class="n">corrected_count_array</span></div>
 
 
 
@@ -220,54 +190,63 @@
 
 
 
-<div class="viewcode-block" id="insert_modified_dose_counts">
-<a class="viewcode-back" href="../main.html#main.insert_modified_dose_counts">[docs]</a>
-<span class="k">def</span> <span class="nf">insert_modified_dose_counts</span><span class="p">(</span><span class="n">corrected_dose_array</span><span class="p">,</span> <span class="n">dose_counts</span><span class="p">):</span>
+<div class="viewcode-block" id="snc_format_array">
+<a class="viewcode-back" href="../main.html#main.snc_format_array">[docs]</a>
+<span class="k">def</span> <span class="nf">snc_format_array</span><span class="p">(</span><span class="n">corrected_count_array</span><span class="p">,</span> <span class="n">formatted_counts</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Inserts corrected dose values into the dose counts array while preserving positional data.</span>
+<span class="sd">    Formats the array to be compatible with the SNC measured txt file.</span>
 
 <span class="sd">    Parameters:</span>
-<span class="sd">    corrected_dose_array (numpy.ndarray): The array containing corrected dose values.</span>
-<span class="sd">    dose_counts (numpy.ndarray): The array containing the dose counts with positional data.</span>
+<span class="sd">    corrected_count_array (numpy.ndarray): The array containing corrected dose values.</span>
+<span class="sd">    formatted_counts (numpy.ndarray): The array containing the counts with positional data directly from measured file.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">    numpy.ndarray: The modified dose counts array with the corrected dose values inserted.</span>
+<span class="sd">    numpy.ndarray: Corrected values in format ready for insertion into SNC txt file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Convert corrected_dose_array values to strings with 16 digits</span>
-    <span class="n">corrected_dose_array_str</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="s2">&quot;</span><span class="si">{:.15f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">row</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">corrected_dose_array</span><span class="p">])</span>
-
-    <span class="c1"># Create a new array to hold the modified data</span>
-    <span class="n">new_dose_counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">dose_counts</span><span class="p">)</span>
+    <span class="c1"># Convert corrected_array values to strings with 16 digits</span>
+    <span class="n">corrected_array_str</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="s2">&quot;</span><span class="si">{:.15f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">row</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">corrected_count_array</span><span class="p">])</span>
 
     <span class="c1"># Insert corrected_dose_array_str into new_dose_counts while preserving positional data</span>
-    <span class="n">new_dose_counts</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">42</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">133</span><span class="p">]</span> <span class="o">=</span> <span class="n">corrected_dose_array_str</span>
+    <span class="n">formatted_counts</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">42</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">133</span><span class="p">]</span> <span class="o">=</span> <span class="n">corrected_array_str</span>
 
-    <span class="k">return</span> <span class="n">new_dose_counts</span></div>
+    <span class="k">return</span> <span class="n">formatted_counts</span></div>
 
 
 
 <div class="viewcode-block" id="main">
 <a class="viewcode-back" href="../main.html#main.main">[docs]</a>
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
-    <span class="n">frame_data_df</span><span class="p">,</span> <span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span> <span class="n">header_data</span><span class="p">,</span> <span class="n">array_data</span> <span class="o">=</span> <span class="n">read_files</span><span class="p">(</span><span class="n">acml_file_path</span><span class="p">,</span>
-                                                                                                         <span class="n">txt_file_path</span><span class="p">)</span>
-    <span class="n">intrinsic_corrections</span> <span class="o">=</span> <span class="n">get_instrinsic_corrections</span><span class="p">(</span><span class="n">array_data</span><span class="p">)</span>
+    <span class="c1"># Read the necessary files and parse the data</span>
+    <span class="p">(</span><span class="n">frame_data_df</span><span class="p">,</span> <span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span>
+     <span class="n">header_data</span><span class="p">,</span> <span class="n">array_data</span><span class="p">)</span> <span class="o">=</span> <span class="n">read_files</span><span class="p">(</span><span class="n">acml_file_path</span><span class="p">,</span> <span class="n">txt_file_path</span><span class="p">)</span>
 
-    <span class="n">corrected_dose_array</span> <span class="o">=</span> <span class="n">apply_jager_corrections</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span> <span class="n">dose_per_count</span><span class="p">)</span>
+    <span class="c1"># Get the intrinsic corrections from the parsed array data</span>
+    <span class="c1"># The intrinsic corrections represent the field size and angular correction applied by the SNC Patient software</span>
+    <span class="n">intrinsic_corrections</span> <span class="o">=</span> <span class="n">corrections</span><span class="o">.</span><span class="n">get_intrinsic_corrections</span><span class="p">(</span><span class="n">array_data</span><span class="p">)</span>
 
-    <span class="c1">#TODO: write corrected_dose_arrays to a new SNC readable .txt file</span>
+    <span class="c1"># Apply the Jager pulse rate and dose per pulse corrections to the accumulated counts</span>
+    <span class="n">corrected_count_array</span> <span class="o">=</span> <span class="n">apply_jager_corrections</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">)</span>
+
+    <span class="c1"># Make a copy of the original array data</span>
     <span class="n">array_data_to_write</span> <span class="o">=</span> <span class="n">array_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">dose_counts</span> <span class="o">=</span> <span class="n">array_data_to_write</span><span class="p">[</span><span class="s1">&#39;Dose Counts&#39;</span><span class="p">]</span>
-    <span class="n">array_data_to_write</span><span class="p">[</span><span class="s1">&#39;Dose Counts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">insert_modified_dose_counts</span><span class="p">(</span><span class="n">corrected_dose_array</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">dose_counts</span><span class="p">)</span>
-    <span class="n">io_snc</span><span class="o">.</span><span class="n">write_snc_txt_file</span><span class="p">(</span><span class="n">array_data_to_write</span><span class="p">,</span> <span class="n">header_data</span><span class="p">,</span> <span class="s1">&#39;../corrected_file.txt&#39;</span><span class="p">)</span>
-    <span class="c1"># For plotting:</span>
-    <span class="n">dose_df</span><span class="p">,</span> <span class="n">dose_accumulated_df</span><span class="p">,</span> <span class="n">dose_rate_df</span><span class="p">,</span> <span class="n">dose_rate_arrays</span> <span class="o">=</span> <span class="n">calculate_dose_values</span><span class="p">(</span>
-        <span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">dose_per_count</span><span class="p">)</span>
 
-    <span class="n">generate_plots</span><span class="p">(</span><span class="n">dose_rate_arrays</span><span class="p">,</span> <span class="n">dose_df</span><span class="p">,</span> <span class="n">dose_rate_df</span><span class="p">,</span> <span class="n">dose_accumulated_df</span><span class="p">,</span>
-                   <span class="n">startframe</span><span class="o">=</span><span class="mi">1550</span><span class="p">,</span> <span class="n">endframe</span><span class="o">=</span><span class="mi">1600</span><span class="p">,</span>
-                   <span class="n">detector_number</span><span class="o">=</span><span class="mi">610</span><span class="p">)</span></div>
+    <span class="c1"># Format the corrected count array to be compatible with the SNC measured txt file</span>
+    <span class="c1"># The corrected count array is inserted into the &#39;Corrected Counts&#39; field of the copied array data</span>
+    <span class="n">array_data_to_write</span><span class="p">[</span><span class="s1">&#39;Corrected Counts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">snc_format_array</span><span class="p">(</span><span class="n">corrected_count_array</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                               <span class="n">array_data_to_write</span><span class="p">[</span><span class="s1">&#39;Corrected Counts&#39;</span><span class="p">])</span>
 
+    <span class="c1"># Write the corrected array data to a new .txt file</span>
+    <span class="c1"># The header data and the name of the new file (&#39;corrected_file.txt&#39;) are also provided</span>
+    <span class="n">io_snc</span><span class="o">.</span><span class="n">write_snc_txt_file</span><span class="p">(</span><span class="n">array_data_to_write</span><span class="p">,</span> <span class="n">header_data</span><span class="p">,</span> <span class="s1">&#39;corrected_file.txt&#39;</span><span class="p">)</span></div>
+
+
+    <span class="c1"># # For plotting:</span>
+    <span class="c1"># dose_df, dose_accumulated_df, dose_rate_df, dose_rate_arrays = calculate_dose_values(</span>
+    <span class="c1">#     counts_accumulated_df, dose_per_count)</span>
+    <span class="c1">#</span>
+    <span class="c1"># generate_plots(dose_rate_arrays, dose_df, dose_rate_df, dose_accumulated_df,</span>
+    <span class="c1">#                startframe=1550, endframe=1600,</span>
+    <span class="c1">#                detector_number=610)</span>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>

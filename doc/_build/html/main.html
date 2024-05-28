@@ -53,10 +53,9 @@
 <li class="toctree-l3"><a class="reference internal" href="#main.apply_jager_corrections"><code class="docutils literal notranslate"><span class="pre">apply_jager_corrections()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#main.calculate_dose_values"><code class="docutils literal notranslate"><span class="pre">calculate_dose_values()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#main.generate_plots"><code class="docutils literal notranslate"><span class="pre">generate_plots()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#main.get_instrinsic_corrections"><code class="docutils literal notranslate"><span class="pre">get_instrinsic_corrections()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#main.insert_modified_dose_counts"><code class="docutils literal notranslate"><span class="pre">insert_modified_dose_counts()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#main.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#main.read_files"><code class="docutils literal notranslate"><span class="pre">read_files()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#main.snc_format_array"><code class="docutils literal notranslate"><span class="pre">snc_format_array()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="plotdiodecounts.html">plotdiodecounts module</a></li>
@@ -69,10 +68,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#main.apply_jager_corrections"><code class="docutils literal notranslate"><span class="pre">apply_jager_corrections()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#main.calculate_dose_values"><code class="docutils literal notranslate"><span class="pre">calculate_dose_values()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#main.generate_plots"><code class="docutils literal notranslate"><span class="pre">generate_plots()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#main.get_instrinsic_corrections"><code class="docutils literal notranslate"><span class="pre">get_instrinsic_corrections()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#main.insert_modified_dose_counts"><code class="docutils literal notranslate"><span class="pre">insert_modified_dose_counts()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#main.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#main.read_files"><code class="docutils literal notranslate"><span class="pre">read_files()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#main.snc_format_array"><code class="docutils literal notranslate"><span class="pre">snc_format_array()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -106,7 +104,7 @@
 <span id="main-module"></span><h1>main module<a class="headerlink" href="#module-main" title="Link to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="main.apply_jager_corrections">
-<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">apply_jager_corrections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">counts_accumulated_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bkrnd_and_calibration_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dose_per_count</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#apply_jager_corrections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.apply_jager_corrections" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">apply_jager_corrections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">counts_accumulated_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bkrnd_and_calibration_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intrinsic_corrections</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#apply_jager_corrections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.apply_jager_corrections" title="Link to this definition"></a></dt>
 <dd><p>Apply Jager pulse rate and dose per pulse corrections.</p>
 </dd></dl>
 
@@ -122,33 +120,6 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="main.get_instrinsic_corrections">
-<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">get_instrinsic_corrections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#get_instrinsic_corrections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.get_instrinsic_corrections" title="Link to this definition"></a></dt>
-<dd><p>Retrieves the intrinsic corrections from the provided array data. These corrections represent the field size and
-angular correction applied by the SNC Patient software.</p>
-<p>The intrinsic corrections are used at the end of the dose rate correction process, after the dose rate dependency
-corrected array of dose values has been calculated from the acm file.</p>
-<p>Parameters:
-array_data (ndarray): The array data from which to extract the intrinsic corrections.</p>
-<p>Returns:
-intrinsic_corrections (ndarray or None): The intrinsic corrections array if successful, None otherwise.</p>
-<p>Prints:
-If successful, prints the intrinsic corrections array.
-If unsuccessful, prints a failure message.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="main.insert_modified_dose_counts">
-<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">insert_modified_dose_counts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">corrected_dose_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dose_counts</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#insert_modified_dose_counts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.insert_modified_dose_counts" title="Link to this definition"></a></dt>
-<dd><p>Inserts corrected dose values into the dose counts array while preserving positional data.</p>
-<p>Parameters:
-corrected_dose_array (numpy.ndarray): The array containing corrected dose values.
-dose_counts (numpy.ndarray): The array containing the dose counts with positional data.</p>
-<p>Returns:
-numpy.ndarray: The modified dose counts array with the corrected dose values inserted.</p>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="main.main">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.main" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -157,6 +128,17 @@ numpy.ndarray: The modified dose counts array with the corrected dose values ins
 <dt class="sig sig-object py" id="main.read_files">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">read_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acml_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">txt_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#read_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.read_files" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main.snc_format_array">
+<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">snc_format_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">corrected_count_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">formatted_counts</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#snc_format_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.snc_format_array" title="Link to this definition"></a></dt>
+<dd><p>Formats the array to be compatible with the SNC measured txt file.</p>
+<p>Parameters:
+corrected_count_array (numpy.ndarray): The array containing corrected dose values.
+formatted_counts (numpy.ndarray): The array containing the counts with positional data directly from measured file.</p>
+<p>Returns:
+numpy.ndarray: Corrected values in format ready for insertion into SNC txt file.</p>
+</dd></dl>
 
 </section>
 
