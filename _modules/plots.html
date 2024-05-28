@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>plots &mdash; Dose Rate Dependency Correction for SNC ArcChecks 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=2709fde1"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Dose Rate Dependency Correction for SNC ArcChecks
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../corrections.html">corrections module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../io_snc.html">io_snc module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../main.html">main module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plotdiodecounts.html">plotdiodecounts module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plots.html">plots module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Dose Rate Dependency Correction for SNC ArcChecks</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">plots</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for plots</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">from</span> <span class="nn">matplotlib.animation</span> <span class="kn">import</span> <span class="n">FuncAnimation</span>
+<span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">ListedColormap</span><span class="p">,</span> <span class="n">BoundaryNorm</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<div class="viewcode-block" id="create_animation">
+<a class="viewcode-back" href="../source/plots.html#plots.create_animation">[docs]</a>
+<span class="k">def</span> <span class="nf">create_animation</span><span class="p">(</span><span class="n">detector_arrays</span><span class="p">,</span> <span class="n">xn</span><span class="p">,</span> <span class="n">yn</span><span class="p">,</span> <span class="n">detector_number</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create an animation of the dose rate over time in the SNC Patient detector array display arrangement.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    detector_arrays (ndarray): A 3D numpy array representing the dose rate at each time point.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>  <span class="c1"># Clear the current axes</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">detector_arrays</span><span class="p">[</span><span class="n">frame</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">detector_arrays</span><span class="p">[</span><span class="n">frame</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">cbar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span> <span class="n">square</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+                    <span class="n">xticklabels</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">yticklabels</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">xticks</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">yticks</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">xticklabels</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">(</span><span class="n">yticklabels</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;X (cm)&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Y (cm)&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Time: </span><span class="si">{</span><span class="n">frame</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">50</span><span class="si">}</span><span class="s1"> ms&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">ioff</span><span class="p">()</span>  <span class="c1"># Turn off interactive mode</span>
+
+    <span class="c1"># Prepare the custom colormap</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;dodgerblue&quot;</span><span class="p">,</span> <span class="s2">&quot;deepskyblue&quot;</span><span class="p">,</span> <span class="s2">&quot;turquoise&quot;</span><span class="p">,</span> <span class="s2">&quot;springgreen&quot;</span><span class="p">,</span> <span class="s2">&quot;seagreen&quot;</span><span class="p">]</span>  <span class="c1"># Define the colors for the colormap</span>
+    <span class="n">cmap</span> <span class="o">=</span> <span class="n">ListedColormap</span><span class="p">(</span><span class="n">colors</span><span class="p">)</span>
+
+    <span class="c1"># Prepare the custom norm</span>
+    <span class="n">boundaries</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span>  <span class="c1"># Define the boundaries for the colors</span>
+    <span class="n">norm</span> <span class="o">=</span> <span class="n">BoundaryNorm</span><span class="p">(</span><span class="n">boundaries</span><span class="p">,</span> <span class="n">cmap</span><span class="o">.</span><span class="n">N</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Set up the figure and axis for the animation</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+    <span class="c1"># Customizing the tick labels to fit the spatial dimensions</span>
+    <span class="n">xticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">detector_arrays</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">num</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+    <span class="n">yticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">detector_arrays</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">num</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">xticklabels</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">32.5</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">11</span><span class="p">)]</span>
+    <span class="n">yticklabels</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="mi">10</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">10</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">5</span><span class="p">)]</span>
+
+    <span class="c1"># Create the animation</span>
+    <span class="n">anim</span> <span class="o">=</span> <span class="n">FuncAnimation</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">update</span><span class="p">,</span> <span class="n">frames</span><span class="o">=</span><span class="n">detector_arrays</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">interval</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+
+    <span class="c1"># Save the animation</span>
+    <span class="n">anim</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;diff_dose_animation_selected_</span><span class="si">{</span><span class="n">xn</span><span class="si">}</span><span class="s1">x</span><span class="si">{</span><span class="n">yn</span><span class="si">}</span><span class="s1">_detector_</span><span class="si">{</span><span class="n">detector_number</span><span class="si">}</span><span class="s1">.gif&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">writer</span><span class="o">=</span><span class="s1">&#39;imagemagick&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  <span class="c1"># Close the plot to prevent it from displaying statically</span></div>
+
+
+<div class="viewcode-block" id="bar_doserate_histogram">
+<a class="viewcode-back" href="../source/plots.html#plots.bar_doserate_histogram">[docs]</a>
+<span class="k">def</span> <span class="nf">bar_doserate_histogram</span><span class="p">(</span><span class="n">dose_df</span><span class="p">,</span> <span class="n">dose_rate_df</span><span class="p">,</span> <span class="n">detector_names</span><span class="p">):</span>
+    <span class="n">all_data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">boundaries</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;0-50&#39;</span><span class="p">,</span> <span class="s1">&#39;50-100&#39;</span><span class="p">,</span> <span class="s1">&#39;100-150&#39;</span><span class="p">,</span> <span class="s1">&#39;150-300&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;300&#39;</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">detector_name</span> <span class="ow">in</span> <span class="n">detector_names</span><span class="p">:</span>
+        <span class="n">dose_detector</span> <span class="o">=</span> <span class="n">dose_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="n">detector_name</span><span class="p">]</span>
+        <span class="n">dose_rate_detector</span> <span class="o">=</span> <span class="n">dose_rate_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="n">detector_name</span><span class="p">]</span>
+
+        <span class="c1"># Create a new column for the dose rate bins</span>
+        <span class="n">dose_rate_bins</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span><span class="n">dose_rate_detector</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">boundaries</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">include_lowest</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Create a new DataFrame with the dose, dose rate bins, and detector index</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+            <span class="s1">&#39;Dose&#39;</span><span class="p">:</span> <span class="n">dose_detector</span><span class="p">,</span>
+            <span class="s1">&#39;Dose Rate Interval&#39;</span><span class="p">:</span> <span class="n">dose_rate_bins</span><span class="p">,</span>
+            <span class="s1">&#39;Detector Names&#39;</span><span class="p">:</span> <span class="n">detector_name</span>  <span class="c1"># Change &#39;Detector&#39; to &#39;Detector Names&#39;</span>
+        <span class="p">})</span>
+        <span class="n">all_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+    <span class="n">all_data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">all_data</span><span class="p">)</span>
+
+    <span class="c1"># Group the data by &#39;Detector Names&#39; and &#39;Dose Rate Interval&#39; and calculate the sum of &#39;Dose&#39; for each group</span>
+    <span class="n">grouped_data</span> <span class="o">=</span> <span class="n">all_data_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;Detector Names&#39;</span><span class="p">,</span> <span class="s1">&#39;Dose Rate Interval&#39;</span><span class="p">])[</span><span class="s1">&#39;Dose&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+
+    <span class="c1"># Define your colors</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;dodgerblue&quot;</span><span class="p">,</span> <span class="s2">&quot;deepskyblue&quot;</span><span class="p">,</span> <span class="s2">&quot;turquoise&quot;</span><span class="p">,</span> <span class="s2">&quot;springgreen&quot;</span><span class="p">,</span> <span class="s2">&quot;seagreen&quot;</span><span class="p">]</span>  <span class="c1"># Use the blue-green spectrum colors</span>
+
+    <span class="c1"># Create the bar plot</span>
+    <span class="n">bar_plot</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">grouped_data</span><span class="p">,</span>
+        <span class="n">x</span><span class="o">=</span><span class="s1">&#39;Detector Names&#39;</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="s1">&#39;Dose&#39;</span><span class="p">,</span>
+        <span class="n">hue</span><span class="o">=</span><span class="s1">&#39;Dose Rate Interval&#39;</span><span class="p">,</span>
+        <span class="n">palette</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span>  <span class="c1"># Use the list of colors directly</span>
+        <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;.3&quot;</span><span class="p">,</span>
+        <span class="n">linewidth</span><span class="o">=</span><span class="mf">.5</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">bar_plot</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>  <span class="c1"># Adjust these values as needed</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Detector Names&#39;</span><span class="p">)</span>  <span class="c1"># Set x-axis label to &#39;Detector Names&#39;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Dose Sum&#39;</span><span class="p">)</span>  <span class="c1"># Set y-axis label to &#39;Dose Sum&#39;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;stacked_histogram.png&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="scatter_cumulative_dose">
+<a class="viewcode-back" href="../source/plots.html#plots.scatter_cumulative_dose">[docs]</a>
+<span class="k">def</span> <span class="nf">scatter_cumulative_dose</span><span class="p">(</span><span class="n">dose_rate_df</span><span class="p">,</span> <span class="n">dose_accumulated_df</span><span class="p">,</span> <span class="n">detector_name</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a seaborn scatter plot with dose accumulated in the y-axis and time in the x-axis.</span>
+<span class="sd">    The hue of the markers will be determined by the dose rate intervals.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    dose_rate_df (pd.DataFrame): DataFrame containing the dose rate values.</span>
+<span class="sd">    dose_accumulated_df (pd.DataFrame): DataFrame containing the dose values.</span>
+<span class="sd">    detector_name (int): The index of the detector to plot.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Select the data for the specific detector</span>
+        <span class="n">dose_rate_detector</span> <span class="o">=</span> <span class="n">dose_rate_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="n">detector_name</span><span class="p">]</span>
+        <span class="n">dose_detector</span> <span class="o">=</span> <span class="n">dose_accumulated_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="n">detector_name</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: Detector index out of range.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="c1"># Calculate time assuming each row increment represents 50 ms</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">dose_rate_df</span><span class="o">.</span><span class="n">index</span> <span class="o">*</span> <span class="mi">50</span>
+
+    <span class="c1"># Create a new DataFrame combining the data</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+        <span class="s1">&#39;Time&#39;</span><span class="p">:</span> <span class="n">time</span><span class="p">,</span>
+        <span class="s1">&#39;Dose Accumulated&#39;</span><span class="p">:</span> <span class="n">dose_detector</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+        <span class="s1">&#39;Dose Rate&#39;</span><span class="p">:</span> <span class="n">dose_rate_detector</span><span class="o">.</span><span class="n">values</span>
+    <span class="p">})</span>
+
+    <span class="c1"># Create a new column for the dose rate intervals</span>
+    <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span>
+    <span class="n">color_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;0-50&#39;</span><span class="p">,</span> <span class="s1">&#39;50-100&#39;</span><span class="p">,</span> <span class="s1">&#39;100-150&#39;</span><span class="p">,</span> <span class="s1">&#39;150-300&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;300&#39;</span><span class="p">]</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;dodgerblue&quot;</span><span class="p">,</span> <span class="s2">&quot;deepskyblue&quot;</span><span class="p">,</span> <span class="s2">&quot;turquoise&quot;</span><span class="p">,</span> <span class="s2">&quot;springgreen&quot;</span><span class="p">,</span> <span class="s2">&quot;seagreen&quot;</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Dose Rate Interval&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Dose Rate&#39;</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">include_lowest</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">color_labels</span><span class="p">)</span>
+
+    <span class="c1"># Set up the figure and axis</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+    <span class="c1"># Plot using seaborn</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+                    <span class="n">x</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span>
+                    <span class="n">y</span><span class="o">=</span><span class="s1">&#39;Dose Accumulated&#39;</span><span class="p">,</span>
+                    <span class="n">hue</span><span class="o">=</span><span class="s1">&#39;Dose Rate Interval&#39;</span><span class="p">,</span>
+                    <span class="n">palette</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span>
+                    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Accumulated Dose Over Time (cGy)&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time (ms)&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Accumulated Dose (cGy)&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;cumulative_dose.png&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  <span class="c1"># Closes the plot to avoid displaying it in interactive environments</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Kaan.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
