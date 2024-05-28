@@ -144,7 +144,7 @@ def main():
 
     # Write the corrected array data to a new .txt file
     # The header data and the name of the new file ('corrected_file.txt') are also provided
-    io_snc.write_snc_txt_file(array_data_to_write, header_data, 'corrected_file.txt')
+    io_snc.write_snc_txt_file(array_data_to_write, header_data, '../corrected_file.txt')
 
     # # For plotting:
     # dose_df, dose_accumulated_df, dose_rate_df, dose_rate_arrays = calculate_dose_values(
