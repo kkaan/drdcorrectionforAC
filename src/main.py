@@ -69,9 +69,8 @@ def apply_jager_corrections(counts_accumulated_df, bkrnd_and_calibration_df, int
     corrected_count_array = io_snc.detector_arrays(corrected_count.T)
 
     #TODO: Intrincic corrections need to be applied here.
-    C
-
-    print(corrected_count_array)
+    numeric_intrinsic = intrinsic_corrections[1:-3, 2:]
+    corrected_count_array *= numeric_intrinsic
     return corrected_count_array
 
 
