@@ -18,35 +18,7 @@ def read_files(acml_path, txt_path):
     array_data = io_snc.parse_arrays_from_file(txt_path)
     return frame_data_df, counts_accumulated_df, bkrnd_and_calibration_df, header_data, array_data
 
-
-def get_instrinsic_corrections(array_data):
-    """
-    Retrieves the intrinsic corrections from the provided array data. These corrections represent the field size and
-    angular correction applied by the SNC Patient software.
-
-    The intrinsic corrections are used at the end of the dose rate correction process, after the dose rate dependency
-    corrected array of dose values has been calculated from the acm file.
-
-    Parameters:
-    array_data (ndarray): The array data from which to extract the intrinsic corrections.
-
-    Returns:
-    intrinsic_corrections (ndarray or None): The intrinsic corrections array if successful, None otherwise.
-
-    Prints:
-    If successful, prints the intrinsic corrections array.
-    If unsuccessful, prints a failure message.
-    """
-    intrinsic_corrections = corrections.get_intrinsic_corrections(array_data)
-    if intrinsic_corrections is not None:
-        print("Intrinsic Corrections Array:")
-        print(intrinsic_corrections)
-    else:
-        print("Failed to calculate intrinsic corrections.")
-    return intrinsic_corrections
-
-
-def apply_jager_corrections(counts_accumulated_df, bkrnd_and_calibration_df, intrinsic_corrections):
+def apply_jager_corrections(counts_accumulated_df, bkrnd_and_calibration_df, intrinsic_corrections=None):
     """Apply Jager pulse rate and dose per pulse corrections."""
     a_pr, b_pr, c_pr = 0.035, 5.21 * 10 ** -5, 1
     jager_pr_coefficients = np.array([a_pr, b_pr, c_pr])
@@ -68,9 +40,12 @@ def apply_jager_corrections(counts_accumulated_df, bkrnd_and_calibration_df, int
     # In the format of the SNC txt file
     corrected_count_array = io_snc.detector_arrays(corrected_count.T)
 
-    #TODO: Intrincic corrections need to be applied here.
-    numeric_intrinsic = intrinsic_corrections[1:-3, 2:]
-    corrected_count_array *= numeric_intrinsic
+    # Apply intrinsic corrections if provided
+    if intrinsic_corrections is not None:
+        numeric_intrinsic = intrinsic_corrections[1:-3, 2:]
+        numeric_intrinsic = np.array(numeric_intrinsic, dtype=float)
+        corrected_count_array *= numeric_intrinsic
+
     return corrected_count_array
 
 
@@ -148,18 +123,28 @@ def snc_format_array(corrected_count_array, formatted_counts):
 
 
 def main():
+    # Read the necessary files and parse the data
     (frame_data_df, counts_accumulated_df, bkrnd_and_calibration_df,
      header_data, array_data) = read_files(acml_file_path, txt_file_path)
-    intrinsic_corrections = get_instrinsic_corrections(array_data)
-    corrected_count_array = apply_jager_corrections(counts_accumulated_df, bkrnd_and_calibration_df, intrinsic_corrections)
 
-    #TODO: Correct with instrinsic corrections
+    # Get the intrinsic corrections from the parsed array data
+    # The intrinsic corrections represent the field size and angular correction applied by the SNC Patient software
+    intrinsic_corrections = corrections.get_intrinsic_corrections(array_data)
 
+    # Apply the Jager pulse rate and dose per pulse corrections to the accumulated counts
+    corrected_count_array = apply_jager_corrections(counts_accumulated_df, bkrnd_and_calibration_df)
+
+    # Make a copy of the original array data
     array_data_to_write = array_data.copy()
-    array_data_to_write['Corrected Counts'] = snc_format_array(corrected_count_array[1],
-                                                                     array_data_to_write['Corrected Counts'])
-    io_snc.write_snc_txt_file(array_data_to_write, header_data, 'corrected_file.txt')
 
+    # Format the corrected count array to be compatible with the SNC measured txt file
+    # The corrected count array is inserted into the 'Corrected Counts' field of the copied array data
+    array_data_to_write['Corrected Counts'] = snc_format_array(corrected_count_array[1],
+                                                               array_data_to_write['Corrected Counts'])
+
+    # Write the corrected array data to a new .txt file
+    # The header data and the name of the new file ('corrected_file.txt') are also provided
+    io_snc.write_snc_txt_file(array_data_to_write, header_data, 'corrected_file.txt')
 
     # # For plotting:
     # dose_df, dose_accumulated_df, dose_rate_df, dose_rate_arrays = calculate_dose_values(
