@@ -4,10 +4,19 @@ import io_snc
 import plots
 from corrections import apply_jager_corrections, get_intrinsic_corrections
 
-# ...
-
 def apply_corrections(counts_accumulated_df, bkrnd_and_calibration_df, include_intrinsic_corrections, array_data):
-    """Apply corrections based on user input."""
+    """
+    Apply corrections based on user input.
+
+    Parameters:
+    counts_accumulated_df (DataFrame): DataFrame with accumulated counts.
+    bkrnd_and_calibration_df (DataFrame): DataFrame with background and calibration data.
+    include_intrinsic_corrections (str): Whether to include intrinsic corrections ('y' or 'n').
+    array_data (ndarray): Array data.
+
+    Returns:
+    ndarray: Corrected count array.
+    """
     if include_intrinsic_corrections == 'y':
         intrinsic_corrections = get_intrinsic_corrections(array_data)
     else:
@@ -17,9 +26,17 @@ def apply_corrections(counts_accumulated_df, bkrnd_and_calibration_df, include_i
 
     return corrected_count_array
 
-# ...
-
 def read_files(acml_path, txt_path):
+    """
+    Read and parse ACM and TXT files.
+
+    Parameters:
+    acml_path (str): Path to the ACM file.
+    txt_path (str): Path to the TXT file.
+
+    Returns:
+    tuple: DataFrames and arrays with parsed data.
+    """
     frame_data_df, counts_accumulated_df, bkrnd_and_calibration_df = io_snc.parse_acm_file(acml_path)
     header_data = io_snc.parse_arccheck_header(txt_path)
     array_data = io_snc.parse_arrays_from_file(txt_path)
@@ -27,7 +44,18 @@ def read_files(acml_path, txt_path):
 
 
 def generate_plots(dose_rate_arrays, dose_df, dose_rate_df, dose_accumulated_df, startframe, endframe, detector_number):
-    """Generate plots and animations."""
+    """
+    Generate plots and animations.
+
+    Parameters:
+    dose_rate_arrays (ndarray): Dose rate arrays.
+    dose_df (DataFrame): DataFrame with dose data.
+    dose_rate_df (DataFrame): DataFrame with dose rate data.
+    dose_accumulated_df (DataFrame): DataFrame with accumulated dose data.
+    startframe (int): Starting frame.
+    endframe (int): Ending frame.
+    detector_number (int): Detector number.
+    """
 
     xn, yn = 31, 15
     diode_numbers_in_snc_array = io_snc.diode_numbers_in_snc_array()
@@ -99,7 +127,8 @@ def snc_format_array(corrected_count_array, formatted_counts):
 
 def get_user_input():
     """Get user input for batch folder path and correction type."""
-    default_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\BatchrunMeasured'
+    default_path = (r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on '
+                    r'script\BatchrunMeasured')
     batch_folder_path = input(
         f"Enter the path to the folder containing the acm files (Press enter to use default path {default_path}): ")
     if batch_folder_path == '':
