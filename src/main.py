@@ -2,49 +2,28 @@ import os
 import numpy as np
 import io_snc
 import plots
-import corrections
-import pandas as pd
+from corrections import apply_jager_corrections, get_intrinsic_corrections
 
-# Configuration
-#acml_file_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6X.acm'
-#txt_file_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6X.txt'
+# ...
 
+def apply_corrections(counts_accumulated_df, bkrnd_and_calibration_df, include_intrinsic_corrections, array_data):
+    """Apply corrections based on user input."""
+    if include_intrinsic_corrections == 'y':
+        intrinsic_corrections = get_intrinsic_corrections(array_data)
+    else:
+        intrinsic_corrections = None
+
+    corrected_count_array = apply_jager_corrections(counts_accumulated_df, bkrnd_and_calibration_df, intrinsic_corrections)
+
+    return corrected_count_array
+
+# ...
 
 def read_files(acml_path, txt_path):
     frame_data_df, counts_accumulated_df, bkrnd_and_calibration_df = io_snc.parse_acm_file(acml_path)
     header_data = io_snc.parse_arccheck_header(txt_path)
     array_data = io_snc.parse_arrays_from_file(txt_path)
     return frame_data_df, counts_accumulated_df, bkrnd_and_calibration_df, header_data, array_data
-
-def apply_jager_corrections(counts_accumulated_df, bkrnd_and_calibration_df, intrinsic_corrections=None):
-    """Apply Jager pulse rate and dose per pulse corrections."""
-    a_pr, b_pr, c_pr = 0.035, 5.21 * 10 ** -5, 1
-    jager_pr_coefficients = np.array([a_pr, b_pr, c_pr])
-
-    a_dpp, b_dpp, c_dpp = 0.0978, 3.33 * 10 ** -5, 1.011
-    jager_dpp_coefficients = np.array([a_dpp, b_dpp, c_dpp])
-
-    pr_corrected_count_sum = corrections.pulse_rate_correction(counts_accumulated_df, bkrnd_and_calibration_df,
-                                                               jager_pr_coefficients)
-    dpp_corrected_count_sum = corrections.dose_per_pulse_correction(counts_accumulated_df, bkrnd_and_calibration_df,
-                                                                    jager_dpp_coefficients)
-
-    # Create a new DataFrame
-    corrected_count = pd.DataFrame({
-        'pr_corrected_dose_df': pr_corrected_count_sum,
-        'dpp_corrected_dose_df': dpp_corrected_count_sum
-    })
-
-    # In the format of the SNC txt file
-    corrected_count_array = io_snc.detector_arrays(corrected_count.T)
-
-    # Apply intrinsic corrections if provided
-    if intrinsic_corrections is not None:
-        numeric_intrinsic = intrinsic_corrections[1:-3, 2:]
-        numeric_intrinsic = np.array(numeric_intrinsic, dtype=float)
-        corrected_count_array *= numeric_intrinsic
-
-    return corrected_count_array
 
 
 def generate_plots(dose_rate_arrays, dose_df, dose_rate_df, dose_accumulated_df, startframe, endframe, detector_number):
@@ -131,16 +110,6 @@ def get_user_input():
 
     return batch_folder_path, correction_type, include_intrinsic_corrections
 
-def apply_corrections(counts_accumulated_df, bkrnd_and_calibration_df, include_intrinsic_corrections, array_data):
-    """Apply corrections based on user input."""
-    if include_intrinsic_corrections == 'y':
-        intrinsic_corrections = corrections.get_intrinsic_corrections(array_data)
-    else:
-        intrinsic_corrections = None
-
-    corrected_count_array = apply_jager_corrections(counts_accumulated_df, bkrnd_and_calibration_df, intrinsic_corrections)
-
-    return corrected_count_array
 
 def main():
     batch_folder_path, correction_type, include_intrinsic_corrections = get_user_input()
@@ -156,21 +125,33 @@ def main():
                 continue
 
             try:
-                frame_data_df, counts_accumulated_df, bkrnd_and_calibration_df, header_data, array_data = read_files(acm_file_path, txt_file_path)
+                (frame_data_df,
+                 counts_accumulated_df,
+                 bkrnd_and_calibration_df,
+                 header_data,
+                 array_data) = read_files(acm_file_path, txt_file_path)
 
                 if include_intrinsic_corrections == 'y':
-                    correction_type += '_intrinsic'
+                    file_name_suffix_intrinsic = '_intrinsic'
+                else:
+                    file_name_suffix_intrinsic = ''
 
-                corrected_count_array = apply_corrections(counts_accumulated_df, bkrnd_and_calibration_df, include_intrinsic_corrections, array_data)
+                corrected_count_array = apply_corrections(counts_accumulated_df,
+                                                          bkrnd_and_calibration_df,
+                                                          include_intrinsic_corrections,
+                                                          array_data)
 
                 array_data_to_write = array_data.copy()
 
                 if correction_type == 'pr':
-                    array_data_to_write['Corrected Counts'] = snc_format_array(corrected_count_array[0], array_data_to_write['Corrected Counts'])
+                    array_data_to_write['Corrected Counts'] = snc_format_array(corrected_count_array[0],
+                                                                               array_data_to_write['Corrected Counts'])
                 else:
-                    array_data_to_write['Corrected Counts'] = snc_format_array(corrected_count_array[1], array_data_to_write['Corrected Counts'])
+                    array_data_to_write['Corrected Counts'] = snc_format_array(corrected_count_array[1],
+                                                                               array_data_to_write['Corrected Counts'])
 
-                write_file_path = txt_file_path[:-4] + '_corrected_' + correction_type + '.txt'
+                write_file_path = (txt_file_path[:-4] + '_corrected_' + correction_type +
+                                   file_name_suffix_intrinsic + '.txt')
 
                 io_snc.write_snc_txt_file(array_data_to_write, header_data, write_file_path)
 

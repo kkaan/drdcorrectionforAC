@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+import io_snc
+
 
 def get_intrinsic_corrections(array_data):
     """
@@ -55,6 +57,35 @@ def get_intrinsic_corrections(array_data):
         print(f"An error occurred: {e}")
         return None
 
+def apply_jager_corrections(counts_accumulated_df, bkrnd_and_calibration_df, intrinsic_corrections=None):
+    """Apply Jager pulse rate and dose per pulse corrections."""
+    a_pr, b_pr, c_pr = 0.035, 5.21 * 10 ** -5, 1
+    jager_pr_coefficients = np.array([a_pr, b_pr, c_pr])
+
+    a_dpp, b_dpp, c_dpp = 0.0978, 3.33 * 10 ** -5, 1.011
+    jager_dpp_coefficients = np.array([a_dpp, b_dpp, c_dpp])
+
+    pr_corrected_count_sum = pulse_rate_correction(counts_accumulated_df, bkrnd_and_calibration_df,
+                                                   jager_pr_coefficients)
+    dpp_corrected_count_sum = dose_per_pulse_correction(counts_accumulated_df, bkrnd_and_calibration_df,
+                                                        jager_dpp_coefficients)
+
+    # Create a new DataFrame
+    corrected_count = pd.DataFrame({
+        'pr_corrected_dose_df': pr_corrected_count_sum,
+        'dpp_corrected_dose_df': dpp_corrected_count_sum
+    })
+
+    # In the format of the SNC txt file
+    corrected_count_array = io_snc.detector_arrays(corrected_count.T)
+
+    # Apply intrinsic corrections if provided
+    if intrinsic_corrections is not None:
+        numeric_intrinsic = intrinsic_corrections[1:-3, 2:]
+        numeric_intrinsic = np.array(numeric_intrinsic, dtype=float)
+        corrected_count_array *= numeric_intrinsic
+
+    return corrected_count_array
 
 def pulse_rate_correction(counts_accumulated_df, bkrnd_and_calibration_df, jager_pr_coefficients):
     """
