@@ -49,9 +49,11 @@
 <li class="toctree-l1"><a class="reference internal" href="corrections.html">corrections module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="io_snc.html">io_snc module</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">main module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#main.apply_corrections"><code class="docutils literal notranslate"><span class="pre">apply_corrections()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#main.apply_jager_corrections"><code class="docutils literal notranslate"><span class="pre">apply_jager_corrections()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#main.calculate_dose_values"><code class="docutils literal notranslate"><span class="pre">calculate_dose_values()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#main.generate_plots"><code class="docutils literal notranslate"><span class="pre">generate_plots()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#main.get_user_input"><code class="docutils literal notranslate"><span class="pre">get_user_input()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#main.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#main.read_files"><code class="docutils literal notranslate"><span class="pre">read_files()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#main.snc_format_array"><code class="docutils literal notranslate"><span class="pre">snc_format_array()</span></code></a></li>
@@ -89,6 +91,12 @@
   <section id="module-main">
 <span id="main-module"></span><h1>main module<a class="headerlink" href="#module-main" title="Link to this heading"></a></h1>
 <dl class="py function">
+<dt class="sig sig-object py" id="main.apply_corrections">
+<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">apply_corrections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">counts_accumulated_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bkrnd_and_calibration_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_intrinsic_corrections</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#apply_corrections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.apply_corrections" title="Link to this definition"></a></dt>
+<dd><p>Apply corrections based on user input.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="main.apply_jager_corrections">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">apply_jager_corrections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">counts_accumulated_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bkrnd_and_calibration_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intrinsic_corrections</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#apply_jager_corrections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.apply_jager_corrections" title="Link to this definition"></a></dt>
 <dd><p>Apply Jager pulse rate and dose per pulse corrections.</p>
@@ -103,6 +111,12 @@
 <dt class="sig sig-object py" id="main.generate_plots">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">generate_plots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dose_rate_arrays</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dose_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dose_rate_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dose_accumulated_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector_number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#generate_plots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.generate_plots" title="Link to this definition"></a></dt>
 <dd><p>Generate plots and animations.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main.get_user_input">
+<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">get_user_input</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#get_user_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.get_user_input" title="Link to this definition"></a></dt>
+<dd><p>Get user input for batch folder path and correction type.</p>
 </dd></dl>
 
 <dl class="py function">
