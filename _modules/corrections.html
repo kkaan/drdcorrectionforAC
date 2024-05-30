@@ -77,6 +77,8 @@
   <h1>Source code for corrections</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">io_snc</span>
+
 
 <div class="viewcode-block" id="get_intrinsic_corrections">
 <a class="viewcode-back" href="../source/corrections.html#corrections.get_intrinsic_corrections">[docs]</a>
@@ -134,6 +136,38 @@
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;An error occurred: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
+
+<div class="viewcode-block" id="apply_jager_corrections">
+<a class="viewcode-back" href="../source/corrections.html#corrections.apply_jager_corrections">[docs]</a>
+<span class="k">def</span> <span class="nf">apply_jager_corrections</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span> <span class="n">intrinsic_corrections</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply Jager pulse rate and dose per pulse corrections.&quot;&quot;&quot;</span>
+    <span class="n">a_pr</span><span class="p">,</span> <span class="n">b_pr</span><span class="p">,</span> <span class="n">c_pr</span> <span class="o">=</span> <span class="mf">0.035</span><span class="p">,</span> <span class="mf">5.21</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span>
+    <span class="n">jager_pr_coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">a_pr</span><span class="p">,</span> <span class="n">b_pr</span><span class="p">,</span> <span class="n">c_pr</span><span class="p">])</span>
+
+    <span class="n">a_dpp</span><span class="p">,</span> <span class="n">b_dpp</span><span class="p">,</span> <span class="n">c_dpp</span> <span class="o">=</span> <span class="mf">0.0978</span><span class="p">,</span> <span class="mf">3.33</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mf">1.011</span>
+    <span class="n">jager_dpp_coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">a_dpp</span><span class="p">,</span> <span class="n">b_dpp</span><span class="p">,</span> <span class="n">c_dpp</span><span class="p">])</span>
+
+    <span class="n">pr_corrected_count_sum</span> <span class="o">=</span> <span class="n">pulse_rate_correction</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span>
+                                                   <span class="n">jager_pr_coefficients</span><span class="p">)</span>
+    <span class="n">dpp_corrected_count_sum</span> <span class="o">=</span> <span class="n">dose_per_pulse_correction</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span>
+                                                        <span class="n">jager_dpp_coefficients</span><span class="p">)</span>
+
+    <span class="c1"># Create a new DataFrame</span>
+    <span class="n">corrected_count</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+        <span class="s1">&#39;pr_corrected_dose_df&#39;</span><span class="p">:</span> <span class="n">pr_corrected_count_sum</span><span class="p">,</span>
+        <span class="s1">&#39;dpp_corrected_dose_df&#39;</span><span class="p">:</span> <span class="n">dpp_corrected_count_sum</span>
+    <span class="p">})</span>
+
+    <span class="c1"># In the format of the SNC txt file</span>
+    <span class="n">corrected_count_array</span> <span class="o">=</span> <span class="n">io_snc</span><span class="o">.</span><span class="n">detector_arrays</span><span class="p">(</span><span class="n">corrected_count</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+    <span class="c1"># Apply intrinsic corrections if provided</span>
+    <span class="k">if</span> <span class="n">intrinsic_corrections</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">numeric_intrinsic</span> <span class="o">=</span> <span class="n">intrinsic_corrections</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">:]</span>
+        <span class="n">numeric_intrinsic</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">numeric_intrinsic</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">corrected_count_array</span> <span class="o">*=</span> <span class="n">numeric_intrinsic</span>
+
+    <span class="k">return</span> <span class="n">corrected_count_array</span></div>
 
 
 <div class="viewcode-block" id="pulse_rate_correction">

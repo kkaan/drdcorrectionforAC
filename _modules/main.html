@@ -79,61 +79,68 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">io_snc</span>
 <span class="kn">import</span> <span class="nn">plots</span>
-<span class="kn">import</span> <span class="nn">corrections</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">corrections</span> <span class="kn">import</span> <span class="n">apply_jager_corrections</span><span class="p">,</span> <span class="n">get_intrinsic_corrections</span>
 
-<span class="c1"># Configuration</span>
-<span class="c1">#acml_file_path = r&#39;P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6X.acm&#39;</span>
-<span class="c1">#txt_file_path = r&#39;P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6X.txt&#39;</span>
+<div class="viewcode-block" id="apply_corrections">
+<a class="viewcode-back" href="../source/main.html#main.apply_corrections">[docs]</a>
+<span class="k">def</span> <span class="nf">apply_corrections</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span> <span class="n">include_intrinsic_corrections</span><span class="p">,</span> <span class="n">array_data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply corrections based on user input.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    counts_accumulated_df (DataFrame): DataFrame with accumulated counts.</span>
+<span class="sd">    bkrnd_and_calibration_df (DataFrame): DataFrame with background and calibration data.</span>
+<span class="sd">    include_intrinsic_corrections (str): Whether to include intrinsic corrections (&#39;y&#39; or &#39;n&#39;).</span>
+<span class="sd">    array_data (ndarray): Array data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    ndarray: Corrected count array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">include_intrinsic_corrections</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span>
+        <span class="n">intrinsic_corrections</span> <span class="o">=</span> <span class="n">get_intrinsic_corrections</span><span class="p">(</span><span class="n">array_data</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">intrinsic_corrections</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">corrected_count_array</span> <span class="o">=</span> <span class="n">apply_jager_corrections</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span> <span class="n">intrinsic_corrections</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">corrected_count_array</span></div>
 
 
 <div class="viewcode-block" id="read_files">
 <a class="viewcode-back" href="../source/main.html#main.read_files">[docs]</a>
 <span class="k">def</span> <span class="nf">read_files</span><span class="p">(</span><span class="n">acml_path</span><span class="p">,</span> <span class="n">txt_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read and parse ACM and TXT files.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    acml_path (str): Path to the ACM file.</span>
+<span class="sd">    txt_path (str): Path to the TXT file.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    tuple: DataFrames and arrays with parsed data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">frame_data_df</span><span class="p">,</span> <span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span> <span class="o">=</span> <span class="n">io_snc</span><span class="o">.</span><span class="n">parse_acm_file</span><span class="p">(</span><span class="n">acml_path</span><span class="p">)</span>
     <span class="n">header_data</span> <span class="o">=</span> <span class="n">io_snc</span><span class="o">.</span><span class="n">parse_arccheck_header</span><span class="p">(</span><span class="n">txt_path</span><span class="p">)</span>
     <span class="n">array_data</span> <span class="o">=</span> <span class="n">io_snc</span><span class="o">.</span><span class="n">parse_arrays_from_file</span><span class="p">(</span><span class="n">txt_path</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">frame_data_df</span><span class="p">,</span> <span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span> <span class="n">header_data</span><span class="p">,</span> <span class="n">array_data</span></div>
 
 
-<div class="viewcode-block" id="apply_jager_corrections">
-<a class="viewcode-back" href="../source/main.html#main.apply_jager_corrections">[docs]</a>
-<span class="k">def</span> <span class="nf">apply_jager_corrections</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span> <span class="n">intrinsic_corrections</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply Jager pulse rate and dose per pulse corrections.&quot;&quot;&quot;</span>
-    <span class="n">a_pr</span><span class="p">,</span> <span class="n">b_pr</span><span class="p">,</span> <span class="n">c_pr</span> <span class="o">=</span> <span class="mf">0.035</span><span class="p">,</span> <span class="mf">5.21</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span>
-    <span class="n">jager_pr_coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">a_pr</span><span class="p">,</span> <span class="n">b_pr</span><span class="p">,</span> <span class="n">c_pr</span><span class="p">])</span>
-
-    <span class="n">a_dpp</span><span class="p">,</span> <span class="n">b_dpp</span><span class="p">,</span> <span class="n">c_dpp</span> <span class="o">=</span> <span class="mf">0.0978</span><span class="p">,</span> <span class="mf">3.33</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mf">1.011</span>
-    <span class="n">jager_dpp_coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">a_dpp</span><span class="p">,</span> <span class="n">b_dpp</span><span class="p">,</span> <span class="n">c_dpp</span><span class="p">])</span>
-
-    <span class="n">pr_corrected_count_sum</span> <span class="o">=</span> <span class="n">corrections</span><span class="o">.</span><span class="n">pulse_rate_correction</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span>
-                                                               <span class="n">jager_pr_coefficients</span><span class="p">)</span>
-    <span class="n">dpp_corrected_count_sum</span> <span class="o">=</span> <span class="n">corrections</span><span class="o">.</span><span class="n">dose_per_pulse_correction</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span>
-                                                                    <span class="n">jager_dpp_coefficients</span><span class="p">)</span>
-
-    <span class="c1"># Create a new DataFrame</span>
-    <span class="n">corrected_count</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
-        <span class="s1">&#39;pr_corrected_dose_df&#39;</span><span class="p">:</span> <span class="n">pr_corrected_count_sum</span><span class="p">,</span>
-        <span class="s1">&#39;dpp_corrected_dose_df&#39;</span><span class="p">:</span> <span class="n">dpp_corrected_count_sum</span>
-    <span class="p">})</span>
-
-    <span class="c1"># In the format of the SNC txt file</span>
-    <span class="n">corrected_count_array</span> <span class="o">=</span> <span class="n">io_snc</span><span class="o">.</span><span class="n">detector_arrays</span><span class="p">(</span><span class="n">corrected_count</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-
-    <span class="c1"># Apply intrinsic corrections if provided</span>
-    <span class="k">if</span> <span class="n">intrinsic_corrections</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">numeric_intrinsic</span> <span class="o">=</span> <span class="n">intrinsic_corrections</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">:]</span>
-        <span class="n">numeric_intrinsic</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">numeric_intrinsic</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-        <span class="n">corrected_count_array</span> <span class="o">*=</span> <span class="n">numeric_intrinsic</span>
-
-    <span class="k">return</span> <span class="n">corrected_count_array</span></div>
-
-
 
 <div class="viewcode-block" id="generate_plots">
 <a class="viewcode-back" href="../source/main.html#main.generate_plots">[docs]</a>
 <span class="k">def</span> <span class="nf">generate_plots</span><span class="p">(</span><span class="n">dose_rate_arrays</span><span class="p">,</span> <span class="n">dose_df</span><span class="p">,</span> <span class="n">dose_rate_df</span><span class="p">,</span> <span class="n">dose_accumulated_df</span><span class="p">,</span> <span class="n">startframe</span><span class="p">,</span> <span class="n">endframe</span><span class="p">,</span> <span class="n">detector_number</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate plots and animations.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate plots and animations.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    dose_rate_arrays (ndarray): Dose rate arrays.</span>
+<span class="sd">    dose_df (DataFrame): DataFrame with dose data.</span>
+<span class="sd">    dose_rate_df (DataFrame): DataFrame with dose rate data.</span>
+<span class="sd">    dose_accumulated_df (DataFrame): DataFrame with accumulated dose data.</span>
+<span class="sd">    startframe (int): Starting frame.</span>
+<span class="sd">    endframe (int): Ending frame.</span>
+<span class="sd">    detector_number (int): Detector number.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">xn</span><span class="p">,</span> <span class="n">yn</span> <span class="o">=</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">15</span>
     <span class="n">diode_numbers_in_snc_array</span> <span class="o">=</span> <span class="n">io_snc</span><span class="o">.</span><span class="n">diode_numbers_in_snc_array</span><span class="p">()</span>
@@ -214,7 +221,8 @@
 <a class="viewcode-back" href="../source/main.html#main.get_user_input">[docs]</a>
 <span class="k">def</span> <span class="nf">get_user_input</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get user input for batch folder path and correction type.&quot;&quot;&quot;</span>
-    <span class="n">default_path</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\BatchrunMeasured&#39;</span>
+    <span class="n">default_path</span> <span class="o">=</span> <span class="p">(</span><span class="sa">r</span><span class="s1">&#39;P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on &#39;</span>
+                    <span class="sa">r</span><span class="s1">&#39;script\BatchrunMeasured&#39;</span><span class="p">)</span>
     <span class="n">batch_folder_path</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;Enter the path to the folder containing the acm files (Press enter to use default path </span><span class="si">{</span><span class="n">default_path</span><span class="si">}</span><span class="s2">): &quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">batch_folder_path</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
@@ -225,19 +233,6 @@
 
     <span class="k">return</span> <span class="n">batch_folder_path</span><span class="p">,</span> <span class="n">correction_type</span><span class="p">,</span> <span class="n">include_intrinsic_corrections</span></div>
 
-
-<div class="viewcode-block" id="apply_corrections">
-<a class="viewcode-back" href="../source/main.html#main.apply_corrections">[docs]</a>
-<span class="k">def</span> <span class="nf">apply_corrections</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span> <span class="n">include_intrinsic_corrections</span><span class="p">,</span> <span class="n">array_data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply corrections based on user input.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">include_intrinsic_corrections</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span>
-        <span class="n">intrinsic_corrections</span> <span class="o">=</span> <span class="n">corrections</span><span class="o">.</span><span class="n">get_intrinsic_corrections</span><span class="p">(</span><span class="n">array_data</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">intrinsic_corrections</span> <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="n">corrected_count_array</span> <span class="o">=</span> <span class="n">apply_jager_corrections</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span> <span class="n">intrinsic_corrections</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">corrected_count_array</span></div>
 
 
 <div class="viewcode-block" id="main">
@@ -256,21 +251,33 @@
                 <span class="k">continue</span>
 
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">frame_data_df</span><span class="p">,</span> <span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span> <span class="n">header_data</span><span class="p">,</span> <span class="n">array_data</span> <span class="o">=</span> <span class="n">read_files</span><span class="p">(</span><span class="n">acm_file_path</span><span class="p">,</span> <span class="n">txt_file_path</span><span class="p">)</span>
+                <span class="p">(</span><span class="n">frame_data_df</span><span class="p">,</span>
+                 <span class="n">counts_accumulated_df</span><span class="p">,</span>
+                 <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span>
+                 <span class="n">header_data</span><span class="p">,</span>
+                 <span class="n">array_data</span><span class="p">)</span> <span class="o">=</span> <span class="n">read_files</span><span class="p">(</span><span class="n">acm_file_path</span><span class="p">,</span> <span class="n">txt_file_path</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">include_intrinsic_corrections</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span>
-                    <span class="n">correction_type</span> <span class="o">+=</span> <span class="s1">&#39;_intrinsic&#39;</span>
+                    <span class="n">file_name_suffix_intrinsic</span> <span class="o">=</span> <span class="s1">&#39;_intrinsic&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">file_name_suffix_intrinsic</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 
-                <span class="n">corrected_count_array</span> <span class="o">=</span> <span class="n">apply_corrections</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span> <span class="n">include_intrinsic_corrections</span><span class="p">,</span> <span class="n">array_data</span><span class="p">)</span>
+                <span class="n">corrected_count_array</span> <span class="o">=</span> <span class="n">apply_corrections</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span>
+                                                          <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span>
+                                                          <span class="n">include_intrinsic_corrections</span><span class="p">,</span>
+                                                          <span class="n">array_data</span><span class="p">)</span>
 
                 <span class="n">array_data_to_write</span> <span class="o">=</span> <span class="n">array_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
                 <span class="k">if</span> <span class="n">correction_type</span> <span class="o">==</span> <span class="s1">&#39;pr&#39;</span><span class="p">:</span>
-                    <span class="n">array_data_to_write</span><span class="p">[</span><span class="s1">&#39;Corrected Counts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">snc_format_array</span><span class="p">(</span><span class="n">corrected_count_array</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">array_data_to_write</span><span class="p">[</span><span class="s1">&#39;Corrected Counts&#39;</span><span class="p">])</span>
+                    <span class="n">array_data_to_write</span><span class="p">[</span><span class="s1">&#39;Corrected Counts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">snc_format_array</span><span class="p">(</span><span class="n">corrected_count_array</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                                               <span class="n">array_data_to_write</span><span class="p">[</span><span class="s1">&#39;Corrected Counts&#39;</span><span class="p">])</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">array_data_to_write</span><span class="p">[</span><span class="s1">&#39;Corrected Counts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">snc_format_array</span><span class="p">(</span><span class="n">corrected_count_array</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">array_data_to_write</span><span class="p">[</span><span class="s1">&#39;Corrected Counts&#39;</span><span class="p">])</span>
+                    <span class="n">array_data_to_write</span><span class="p">[</span><span class="s1">&#39;Corrected Counts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">snc_format_array</span><span class="p">(</span><span class="n">corrected_count_array</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                                               <span class="n">array_data_to_write</span><span class="p">[</span><span class="s1">&#39;Corrected Counts&#39;</span><span class="p">])</span>
 
-                <span class="n">write_file_path</span> <span class="o">=</span> <span class="n">txt_file_path</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_corrected_&#39;</span> <span class="o">+</span> <span class="n">correction_type</span> <span class="o">+</span> <span class="s1">&#39;.txt&#39;</span>
+                <span class="n">write_file_path</span> <span class="o">=</span> <span class="p">(</span><span class="n">txt_file_path</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_corrected_&#39;</span> <span class="o">+</span> <span class="n">correction_type</span> <span class="o">+</span>
+                                   <span class="n">file_name_suffix_intrinsic</span> <span class="o">+</span> <span class="s1">&#39;.txt&#39;</span><span class="p">)</span>
 
                 <span class="n">io_snc</span><span class="o">.</span><span class="n">write_snc_txt_file</span><span class="p">(</span><span class="n">array_data_to_write</span><span class="p">,</span> <span class="n">header_data</span><span class="p">,</span> <span class="n">write_file_path</span><span class="p">)</span>
 
