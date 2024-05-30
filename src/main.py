@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import io_snc
 import plots
@@ -5,11 +6,8 @@ import corrections
 import pandas as pd
 
 # Configuration
-acml_file_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6X.acm'
-txt_file_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6X.txt'
-
-# TODO: Get dose per count calibration factor from acl file directly.
-dose_per_count: float = 7.7597E-06  # cGy/count
+#acml_file_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6X.acm'
+#txt_file_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\13-Jun-2023-Plan7 6X.txt'
 
 
 def read_files(acml_path, txt_path):
@@ -101,7 +99,6 @@ def calculate_dose_values(counts_accumulated_df, dose_per_count):
 
     return dose_df, dose_accumulated_df, dose_rate_df, dose_rate_arrays
 
-
 def snc_format_array(corrected_count_array, formatted_counts):
     """
     Formats the array to be compatible with the SNC measured txt file.
@@ -121,41 +118,67 @@ def snc_format_array(corrected_count_array, formatted_counts):
 
     return formatted_counts
 
+def get_user_input():
+    """Get user input for batch folder path and correction type."""
+    default_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\BatchrunMeasured'
+    batch_folder_path = input(
+        f"Enter the path to the folder containing the acm files (Press enter to use default path {default_path}): ")
+    if batch_folder_path == '':
+        batch_folder_path = default_path
+
+    correction_type = input("Enter the type of correction to apply (dpp or pr): ")
+    include_intrinsic_corrections = input("Do you want to re-apply intrinsic corrections? (y/n): ")
+
+    return batch_folder_path, correction_type, include_intrinsic_corrections
+
+def apply_corrections(counts_accumulated_df, bkrnd_and_calibration_df, include_intrinsic_corrections, array_data):
+    """Apply corrections based on user input."""
+    if include_intrinsic_corrections == 'y':
+        intrinsic_corrections = corrections.get_intrinsic_corrections(array_data)
+    else:
+        intrinsic_corrections = None
+
+    corrected_count_array = apply_jager_corrections(counts_accumulated_df, bkrnd_and_calibration_df, intrinsic_corrections)
+
+    return corrected_count_array
 
 def main():
-    # Read the necessary files and parse the data
-    (frame_data_df, counts_accumulated_df, bkrnd_and_calibration_df,
-     header_data, array_data) = read_files(acml_file_path, txt_file_path)
+    batch_folder_path, correction_type, include_intrinsic_corrections = get_user_input()
 
-    # Get the intrinsic corrections from the parsed array data
-    # The intrinsic corrections represent the field size and angular correction applied by the SNC Patient software
-    intrinsic_corrections = corrections.get_intrinsic_corrections(array_data)
+    for file in os.listdir(batch_folder_path):
+        if file.endswith(".acm"):
+            print(f"Processing file: {file}")
+            acm_file_path = os.path.join(batch_folder_path, file)
+            txt_file_path = os.path.join(batch_folder_path, file[:-4] + ".txt")
 
-    # Apply the Jager pulse rate and dose per pulse corrections to the accumulated counts
-    corrected_count_array = apply_jager_corrections(counts_accumulated_df, bkrnd_and_calibration_df)
+            if not os.path.isfile(txt_file_path):
+                print(f"Matching .txt file for {file} not found. Skipping this file.")
+                continue
 
-    # Make a copy of the original array data
-    array_data_to_write = array_data.copy()
+            try:
+                frame_data_df, counts_accumulated_df, bkrnd_and_calibration_df, header_data, array_data = read_files(acm_file_path, txt_file_path)
 
-    # Format the corrected count array to be compatible with the SNC measured txt file
-    # The corrected count array is inserted into the 'Corrected Counts' field of the copied array data
-    array_data_to_write['Corrected Counts'] = snc_format_array(corrected_count_array[1],
-                                                               array_data_to_write['Corrected Counts'])
+                if include_intrinsic_corrections == 'y':
+                    correction_type += '_intrinsic'
 
-    # Write the corrected array data to a new .txt file
-    # The header data and the name of the new file ('corrected_file.txt') are also provided
-    io_snc.write_snc_txt_file(array_data_to_write, header_data, '../corrected_file.txt')
+                corrected_count_array = apply_corrections(counts_accumulated_df, bkrnd_and_calibration_df, include_intrinsic_corrections, array_data)
 
-    # # For plotting:
-    # dose_df, dose_accumulated_df, dose_rate_df, dose_rate_arrays = calculate_dose_values(
-    #     counts_accumulated_df, dose_per_count)
-    #
-    # generate_plots(dose_rate_arrays, dose_df, dose_rate_df, dose_accumulated_df,
-    #                startframe=1550, endframe=1600,
-    #                detector_number=610)
+                array_data_to_write = array_data.copy()
 
+                if correction_type == 'pr':
+                    array_data_to_write['Corrected Counts'] = snc_format_array(corrected_count_array[0], array_data_to_write['Corrected Counts'])
+                else:
+                    array_data_to_write['Corrected Counts'] = snc_format_array(corrected_count_array[1], array_data_to_write['Corrected Counts'])
+
+                write_file_path = txt_file_path[:-4] + '_corrected_' + correction_type + '.txt'
+
+                io_snc.write_snc_txt_file(array_data_to_write, header_data, write_file_path)
+
+            except FileNotFoundError:
+                print(f"File {file} not found.")
+            except Exception as e:
+                print(f"An error occurred while processing {file}: {str(e)}")
 
 if __name__ == "__main__":
     main()
 
-# TODO: Create a function to put the corrected dose values back into the .txt file
