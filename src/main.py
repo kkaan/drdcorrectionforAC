@@ -56,7 +56,6 @@ def generate_plots(dose_rate_arrays, dose_df, dose_rate_df, dose_accumulated_df,
     endframe (int): Ending frame.
     detector_number (int): Detector number.
     """
-
     xn, yn = 31, 15
     diode_numbers_in_snc_array = io_snc.diode_numbers_in_snc_array()
     X = np.arange(-32.5, 33, 0.5)
@@ -84,10 +83,18 @@ def generate_plots(dose_rate_arrays, dose_df, dose_rate_df, dose_accumulated_df,
 
 
 def calculate_dose_values(counts_accumulated_df, dose_per_count):
-    # Calculate the dose values
-    # Dose per count calibration factor
+    """
+    Calculate dose values and dose rate values.
 
-    # Calculate the dose values
+    Parameters:
+    counts_accumulated_df (DataFrame): DataFrame with accumulated counts.
+    dose_per_count (float): Dose per count.
+
+    Returns:
+    tuple: DataFrames with dose values and dose rate values.
+
+    """
+
     dose_accumulated_df = counts_accumulated_df * dose_per_count  # cGy
 
     # Calculate the difference between current row and previous row
