@@ -141,7 +141,6 @@
 <span class="sd">    endframe (int): Ending frame.</span>
 <span class="sd">    detector_number (int): Detector number.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">xn</span><span class="p">,</span> <span class="n">yn</span> <span class="o">=</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">15</span>
     <span class="n">diode_numbers_in_snc_array</span> <span class="o">=</span> <span class="n">io_snc</span><span class="o">.</span><span class="n">diode_numbers_in_snc_array</span><span class="p">()</span>
     <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">32.5</span><span class="p">,</span> <span class="mi">33</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
@@ -172,10 +171,18 @@
 <div class="viewcode-block" id="calculate_dose_values">
 <a class="viewcode-back" href="../source/main.html#main.calculate_dose_values">[docs]</a>
 <span class="k">def</span> <span class="nf">calculate_dose_values</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">dose_per_count</span><span class="p">):</span>
-    <span class="c1"># Calculate the dose values</span>
-    <span class="c1"># Dose per count calibration factor</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate dose values and dose rate values.</span>
 
-    <span class="c1"># Calculate the dose values</span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    counts_accumulated_df (DataFrame): DataFrame with accumulated counts.</span>
+<span class="sd">    dose_per_count (float): Dose per count.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    tuple: DataFrames with dose values and dose rate values.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">dose_accumulated_df</span> <span class="o">=</span> <span class="n">counts_accumulated_df</span> <span class="o">*</span> <span class="n">dose_per_count</span>  <span class="c1"># cGy</span>
 
     <span class="c1"># Calculate the difference between current row and previous row</span>

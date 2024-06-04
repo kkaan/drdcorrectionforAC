@@ -77,14 +77,34 @@
              
   <section id="module-io_snc">
 <span id="io-snc-module"></span><h1>io_snc module<a class="headerlink" href="#module-io_snc" title="Link to this heading"></a></h1>
+<p>This module, <cite>io_snc.py</cite>, contains functions for handling input and output operations related to ArcCheck files.</p>
+<p>The module includes the following functions:</p>
+<ul class="simple">
+<li><p><cite>parse_arccheck_header</cite>: Parses the header information from an ArcCheck file and returns it as a dictionary.</p></li>
+<li><p><cite>parse_arrays_from_file</cite>: Parses the array data from an ArcCheck file and returns it as a dictionary.</p></li>
+<li><p><cite>write_snc_txt_file</cite>: Writes the array data and header into a .txt file in the same format as it was read.</p></li>
+<li><p><cite>parse_acm_file</cite>: Parses an ACM file and returns the frame data, diode data, and background and calibration data.</p></li>
+<li><p><cite>detector_arrays</cite>: Rearranges the detector data from acl file into the one displayed in SNC Patient.</p></li>
+<li><p><cite>diode_numbers_in_snc_array</cite>: Reorganizes the detectors numbers in an acl measurement file into the planar array that is displayed in SNC Patient software.</p></li>
+</ul>
+<p>This module is part of a larger project aimed at analyzing and correcting dose rate dependencies in ArcCheck measurements.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="io_snc.detector_arrays">
 <span class="sig-prename descclassname"><span class="pre">io_snc.</span></span><span class="sig-name descname"><span class="pre">detector_arrays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acl_detectors</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/io_snc.html#detector_arrays"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#io_snc.detector_arrays" title="Link to this definition"></a></dt>
 <dd><p>Rearranges the detector data from acl file into the one displayed in SNC Patient.</p>
-<p>Parameters:
-acl_detectors (DataFrame): The measurement data arranged in acl formal.</p>
-<p>Returns:
-arrays (ndarray): A 3D numpy array created from the differential dose data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>acl_detectors</strong> (<em>pandas.DataFrame</em>) – The measurement data arranged in acl formal.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 3D numpy array created from the differential dose data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The function initializes a 3D numpy array with zeros and fills it with the detector data.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -92,36 +112,99 @@ arrays (ndarray): A 3D numpy array created from the differential dose data.</p>
 <span class="sig-prename descclassname"><span class="pre">io_snc.</span></span><span class="sig-name descname"><span class="pre">diode_numbers_in_snc_array</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/io_snc.html#diode_numbers_in_snc_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#io_snc.diode_numbers_in_snc_array" title="Link to this definition"></a></dt>
 <dd><p>Reorganizes the detectors numbers in an acl measurement file into the planar array
 that is displayed in SNC Patient software.</p>
-<p>Parameters:
-acl_file (str): The path to the acl measurement file.</p>
-<p>Returns:
-array (ndarray): A 2D numpy array representing the reorganized detectors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A 2D numpy array representing the reorganized detectors.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The function creates an initial array of size 41x131 filled with zeros and fills every second row and column with detector numbers.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="io_snc.parse_acm_file">
 <span class="sig-prename descclassname"><span class="pre">io_snc.</span></span><span class="sig-name descname"><span class="pre">parse_acm_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/io_snc.html#parse_acm_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#io_snc.parse_acm_file" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Parses an ACM file and returns the frame data, diode data, and background and calibration data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em>) – The path to the ACM file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing three pandas DataFrames: frame_data_df, diode_data_df, bkrnd_and_calibration_df.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The function reads the file line by line and splits each line at the tab character to separate keys and values.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="io_snc.parse_arccheck_header">
 <span class="sig-prename descclassname"><span class="pre">io_snc.</span></span><span class="sig-name descname"><span class="pre">parse_arccheck_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/io_snc.html#parse_arccheck_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#io_snc.parse_arccheck_header" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Parses the header information from an ArcCheck file and returns it as a dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em>) – The path to the ArcCheck file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary containing the header information if the file exists and can be read successfully.
+Returns None if the file does not exist or an error occurs during reading.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict or None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Exception</strong> – If an error occurs during file reading.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The function reads the file line by line and splits each line at the colon character to separate keys and values.
+The keys are predefined in the <cite>header_keys</cite> dictionary. If a key from the file matches a key in <cite>header_keys</cite>,
+the corresponding value is updated in the dictionary. The function also captures the full header text.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="io_snc.parse_arrays_from_file">
 <span class="sig-prename descclassname"><span class="pre">io_snc.</span></span><span class="sig-name descname"><span class="pre">parse_arrays_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/io_snc.html#parse_arrays_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#io_snc.parse_arrays_from_file" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Parses the array data from an ArcCheck file and returns it as a dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em>) – The path to the ArcCheck file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary containing the array data if the file exists and can be read successfully.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The function reads the file line by line and splits each line at the space character to separate keys and values.
+The keys are predefined in the <cite>valid_arrays</cite> list. If a key from the file matches a key in <cite>valid_arrays</cite>,
+the corresponding value is updated in the dictionary.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="io_snc.write_snc_txt_file">
 <span class="sig-prename descclassname"><span class="pre">io_snc.</span></span><span class="sig-name descname"><span class="pre">write_snc_txt_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/io_snc.html#write_snc_txt_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#io_snc.write_snc_txt_file" title="Link to this definition"></a></dt>
-<dd><p>Writes the array data and header into a .txt file in the same format as it was read.
-Omits None values and uses tabs instead of spaces between array values.</p>
-<p>Parameters:
-- array_data (dict): Dictionary containing all the array data.
-- header_data (dict): Dictionary containing all the header information, including ‘Full Header Text’.
-- file_path (str): Path to the file where the data should be saved.</p>
+<dd><p>Writes the array data and header into a .txt file in the same format as it was read.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array_data</strong> (<em>dict</em>) – Dictionary containing all the array data.</p></li>
+<li><p><strong>header_data</strong> (<em>dict</em>) – Dictionary containing all the header information, including ‘Full Header Text’.</p></li>
+<li><p><strong>file_path</strong> (<em>str</em>) – Path to the file where the data should be saved.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The function writes the full header text directly from the header_data dictionary.
+Then it writes each array, skipping None values and using tabs as delimiter.</p>
 </dd></dl>
 
 </section>

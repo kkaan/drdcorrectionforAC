@@ -77,6 +77,15 @@
              
   <section id="module-corrections">
 <span id="corrections-module"></span><h1>corrections module<a class="headerlink" href="#module-corrections" title="Link to this heading"></a></h1>
+<p>This module, <cite>corrections.py</cite>, contains functions for applying various corrections to ArcCheck measurements.</p>
+<p>The module includes the following functions:</p>
+<ul class="simple">
+<li><p><cite>get_intrinsic_corrections</cite>: Calculates the Intrinsic Correction array as an element-wise division of Corrected Counts by Raw Counts.</p></li>
+<li><p><cite>apply_jager_corrections</cite>: Applies Jager pulse rate and dose per pulse corrections to the accumulated count values.</p></li>
+<li><p><cite>pulse_rate_correction</cite>: Corrects the count values using the Jager pulse rate correction coefficients.</p></li>
+<li><p><cite>dose_per_pulse_correction</cite>: Corrects the count values using the Jager dose per pulse correction coefficients.</p></li>
+</ul>
+<p>This module is part of a larger project aimed at analyzing and correcting dose rate dependencies in ArcCheck measurements.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="corrections.apply_jager_corrections">
 <span class="sig-prename descclassname"><span class="pre">corrections.</span></span><span class="sig-name descname"><span class="pre">apply_jager_corrections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">counts_accumulated_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bkrnd_and_calibration_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intrinsic_corrections</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/corrections.html#apply_jager_corrections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#corrections.apply_jager_corrections" title="Link to this definition"></a></dt>

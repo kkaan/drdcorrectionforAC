@@ -75,18 +75,56 @@
            <div itemprop="articleBody">
              
   <h1>Source code for io_snc</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Description:  This script reads a detector file and returns the data, background, and calibration factor.</span>
-<span class="c1">#               It also rearranges the detector data from the acl file into the one displayed in SNC Patient.</span>
-<span class="c1">#               The detector data is then saved as a .npz file.</span>
-<span class="c1"># NOTE: Currently only takes in pre-formatted interim tab delimited file.</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module, `io_snc.py`, contains functions for handling input and output operations related to ArcCheck files.</span>
+
+<span class="sd">The module includes the following functions:</span>
+
+<span class="sd">- `parse_arccheck_header`: Parses the header information from an ArcCheck file and returns it as a dictionary.</span>
+<span class="sd">- `parse_arrays_from_file`: Parses the array data from an ArcCheck file and returns it as a dictionary.</span>
+<span class="sd">- `write_snc_txt_file`: Writes the array data and header into a .txt file in the same format as it was read.</span>
+<span class="sd">- `parse_acm_file`: Parses an ACM file and returns the frame data, diode data, and background and calibration data.</span>
+<span class="sd">- `detector_arrays`: Rearranges the detector data from acl file into the one displayed in SNC Patient.</span>
+<span class="sd">- `diode_numbers_in_snc_array`: Reorganizes the detectors numbers in an acl measurement file into the planar array that is displayed in SNC Patient software.</span>
+
+<span class="sd">This module is part of a larger project aimed at analyzing and correcting dose rate dependencies in ArcCheck measurements.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
+
 <div class="viewcode-block" id="parse_arccheck_header">
 <a class="viewcode-back" href="../source/io_snc.html#io_snc.parse_arccheck_header">[docs]</a>
 <span class="k">def</span> <span class="nf">parse_arccheck_header</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses the header information from an ArcCheck file and returns it as a dictionary.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    file_path : str</span>
+<span class="sd">        The path to the ArcCheck file.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict or None</span>
+<span class="sd">        A dictionary containing the header information if the file exists and can be read successfully.</span>
+<span class="sd">        Returns None if the file does not exist or an error occurs during reading.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    Exception</span>
+<span class="sd">        If an error occurs during file reading.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The function reads the file line by line and splits each line at the colon character to separate keys and values.</span>
+<span class="sd">    The keys are predefined in the `header_keys` dictionary. If a key from the file matches a key in `header_keys`,</span>
+<span class="sd">    the corresponding value is updated in the dictionary. The function also captures the full header text.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: The file </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2"> does not exist.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
@@ -135,9 +173,29 @@
         <span class="k">return</span> <span class="kc">None</span></div>
 
 
+
 <div class="viewcode-block" id="parse_arrays_from_file">
 <a class="viewcode-back" href="../source/io_snc.html#io_snc.parse_arrays_from_file">[docs]</a>
 <span class="k">def</span> <span class="nf">parse_arrays_from_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses the array data from an ArcCheck file and returns it as a dictionary.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    file_path : str</span>
+<span class="sd">        The path to the ArcCheck file.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">        A dictionary containing the array data if the file exists and can be read successfully.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The function reads the file line by line and splits each line at the space character to separate keys and values.</span>
+<span class="sd">    The keys are predefined in the `valid_arrays` list. If a key from the file matches a key in `valid_arrays`,</span>
+<span class="sd">    the corresponding value is updated in the dictionary.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">array_data</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">current_array</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">array_content</span> <span class="o">=</span> <span class="p">[]</span>
@@ -176,17 +234,26 @@
     <span class="k">return</span> <span class="n">array_data</span></div>
 
 
+
 <div class="viewcode-block" id="write_snc_txt_file">
 <a class="viewcode-back" href="../source/io_snc.html#io_snc.write_snc_txt_file">[docs]</a>
 <span class="k">def</span> <span class="nf">write_snc_txt_file</span><span class="p">(</span><span class="n">array_data</span><span class="p">,</span> <span class="n">header_data</span><span class="p">,</span> <span class="n">file_path</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Writes the array data and header into a .txt file in the same format as it was read.</span>
-<span class="sd">    Omits None values and uses tabs instead of spaces between array values.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    - array_data (dict): Dictionary containing all the array data.</span>
-<span class="sd">    - header_data (dict): Dictionary containing all the header information, including &#39;Full Header Text&#39;.</span>
-<span class="sd">    - file_path (str): Path to the file where the data should be saved.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    array_data : dict</span>
+<span class="sd">        Dictionary containing all the array data.</span>
+<span class="sd">    header_data : dict</span>
+<span class="sd">        Dictionary containing all the header information, including &#39;Full Header Text&#39;.</span>
+<span class="sd">    file_path : str</span>
+<span class="sd">        Path to the file where the data should be saved.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The function writes the full header text directly from the header_data dictionary.</span>
+<span class="sd">    Then it writes each array, skipping None values and using tabs as delimiter.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
@@ -211,9 +278,27 @@
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;An error occurred while writing to file: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
+
 <div class="viewcode-block" id="parse_acm_file">
 <a class="viewcode-back" href="../source/io_snc.html#io_snc.parse_acm_file">[docs]</a>
 <span class="k">def</span> <span class="nf">parse_acm_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses an ACM file and returns the frame data, diode data, and background and calibration data.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    file_path : str</span>
+<span class="sd">        The path to the ACM file.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple</span>
+<span class="sd">        A tuple containing three pandas DataFrames: frame_data_df, diode_data_df, bkrnd_and_calibration_df.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The function reads the file line by line and splits each line at the tab character to separate keys and values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">frame_data_keys</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s1">&#39;UPDATE#&#39;</span><span class="p">,</span> <span class="s1">&#39;TIMETIC1&#39;</span><span class="p">,</span> <span class="s1">&#39;TIMETIC2&#39;</span><span class="p">,</span> <span class="s1">&#39;PULSES&#39;</span><span class="p">,</span>
         <span class="s1">&#39;STATUS1&#39;</span><span class="p">,</span> <span class="s1">&#39;STATUS2&#39;</span><span class="p">,</span> <span class="s1">&#39;VirtualInclinometer&#39;</span><span class="p">,</span> <span class="s1">&#39;CorrectedAngle&#39;</span><span class="p">,</span> <span class="s1">&#39;FieldSize&#39;</span><span class="p">,</span> <span class="s1">&#39;Reference Diode&#39;</span>
@@ -256,11 +341,12 @@
     <span class="n">frame_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">frame_data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="n">diode_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">diode_data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
-    <span class="n">diode_data_keys</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1387</span><span class="p">)]</span> <span class="c1"># getting rid of the reference diodo key</span>
+    <span class="n">diode_data_keys</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1387</span><span class="p">)]</span>  <span class="c1"># getting rid of the reference diodo key</span>
     <span class="n">frame_data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">frame_data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">frame_data_keys</span><span class="p">)</span>
     <span class="n">diode_data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">diode_data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">diode_data_keys</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">frame_data_df</span><span class="p">,</span> <span class="n">diode_data_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span></div>
+
 
 
 <div class="viewcode-block" id="detector_arrays">
@@ -269,11 +355,19 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Rearranges the detector data from acl file into the one displayed in SNC Patient.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    acl_detectors (DataFrame): The measurement data arranged in acl formal.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    acl_detectors : pandas.DataFrame</span>
+<span class="sd">        The measurement data arranged in acl formal.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    arrays (ndarray): A 3D numpy array created from the differential dose data.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        A 3D numpy array created from the differential dose data.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The function initializes a 3D numpy array with zeros and fills it with the detector data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Initialize a 3D numpy array with zeros</span>
     <span class="n">arrays</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">acl_detectors</span><span class="p">),</span> <span class="mi">41</span><span class="p">,</span> <span class="mi">131</span><span class="p">))</span>
@@ -288,12 +382,14 @@
             <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">131</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>  <span class="c1"># Start from the first column, move right in steps of 2</span>
                 <span class="k">if</span> <span class="n">number</span> <span class="o">&lt;=</span> <span class="mi">1386</span><span class="p">:</span>
                     <span class="c1"># Assign the count value corresponding to the detector number</span>
-                    <span class="n">arrays</span><span class="p">[</span><span class="n">row_index</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_row_counts</span><span class="p">[</span><span class="n">number</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>  <span class="c1"># Adjust for 0-based indexing in the array</span>
+                    <span class="n">arrays</span><span class="p">[</span><span class="n">row_index</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_row_counts</span><span class="p">[</span>
+                        <span class="n">number</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>  <span class="c1"># Adjust for 0-based indexing in the array</span>
                     <span class="n">number</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">break</span>  <span class="c1"># Stop if the number exceeds 1386</span>
 
     <span class="k">return</span> <span class="n">arrays</span></div>
+
 
 
 <div class="viewcode-block" id="diode_numbers_in_snc_array">
@@ -303,11 +399,14 @@
 <span class="sd">    Reorganizes the detectors numbers in an acl measurement file into the planar array</span>
 <span class="sd">    that is displayed in SNC Patient software.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    acl_file (str): The path to the acl measurement file.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        A 2D numpy array representing the reorganized detectors.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    array (ndarray): A 2D numpy array representing the reorganized detectors.</span>
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The function creates an initial array of size 41x131 filled with zeros and fills every second row and column with detector numbers.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Step 1: Read the acl file and extract the detector numbers</span>
     <span class="c1"># This step is dependent on the format of the acl file and is not shown here</span>
@@ -331,9 +430,6 @@
 
 
 
-
-
-<span class="c1">#TODO: Add functionality to read in raw data from acl file and format it into the correct format.</span>
 </pre></div>
 
            </div>

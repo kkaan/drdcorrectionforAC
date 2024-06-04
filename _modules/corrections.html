@@ -75,7 +75,21 @@
            <div itemprop="articleBody">
              
   <h1>Source code for corrections</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module, `corrections.py`, contains functions for applying various corrections to ArcCheck measurements.</span>
+
+<span class="sd">The module includes the following functions:</span>
+
+<span class="sd">- `get_intrinsic_corrections`: Calculates the Intrinsic Correction array as an element-wise division of Corrected Counts by Raw Counts.</span>
+<span class="sd">- `apply_jager_corrections`: Applies Jager pulse rate and dose per pulse corrections to the accumulated count values.</span>
+<span class="sd">- `pulse_rate_correction`: Corrects the count values using the Jager pulse rate correction coefficients.</span>
+<span class="sd">- `dose_per_pulse_correction`: Corrects the count values using the Jager dose per pulse correction coefficients.</span>
+
+<span class="sd">This module is part of a larger project aimed at analyzing and correcting dose rate dependencies in ArcCheck measurements.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">io_snc</span>
 
