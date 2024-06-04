@@ -1,3 +1,19 @@
+"""
+This module, `correction_coefficients.py`, contains functions for calculating and visualizing correction coefficients for dose rate dependency in ArcCheck measurements.
+
+The module includes the following functions:
+
+- `get_pr_data_from_acm_files`: Extracts the average counts/50ms from ACM files in a specified directory.
+- `exponential_fit`: Defines an exponential fitting function for curve fitting.
+- `get_correction_coefficients`: Calculates the correction coefficients based on the average counts/50ms and relative signal values.
+- `plot_correction_curve`: Plots the correction curve with the data points and the fitted exponential function.
+- `plot_counts_per_50ms`: Plots the counts per 50ms at different nominal dose rates.
+- `main`: Main function to execute the correction coefficient calculations and plotting.
+
+This module is part of a larger project aimed at analyzing and correcting dose rate dependencies in ArcCheck measurements.
+
+"""
+
 import os
 import sys
 
@@ -10,17 +26,21 @@ from scipy.optimize import curve_fit
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src import io_snc
 
+
 def get_pr_data_from_acm_files(pr_measurement_folder):
     """
-       Get the average counts/50ms from the ACM files.
+    Get the average counts/50ms from the ACM files.
 
-       Parameters:
-       pr_measurement_folder (str): Path to the folder containing ACM files.
+    Parameters
+    ----------
+    pr_measurement_folder : str
+        Path to the folder containing ACM files.
 
-       Returns:
-       list: List of tuples containing the file name and the average counts/50ms for each nominal dose rate.
-       """
-    # Convert diode numbers to strings
+    Returns
+    -------
+    list of tuple
+        List of tuples containing the file name and the average counts/50ms for each nominal dose rate.
+    """
     diode_numbers = np.array([758, 759, 760, 761, 692, 693, 694, 695, 626, 627, 628, 629]).astype(str)
     counts_per_50ms_list = []
 
@@ -46,54 +66,79 @@ def get_pr_data_from_acm_files(pr_measurement_folder):
         # Calculate the average count rate for the selected diodes
         avg_count_rate = count_rate_df.mean().mean()
         counts_per_50ms_list.append((acm_file, avg_count_rate))
+
     counts_per_50ms_list = sorted(counts_per_50ms_list, key=lambda x: x[1])
     return counts_per_50ms_list
 
+
+def exponential_fit(x, a, b, c):
+    """
+    Exponential fitting function.
+
+    Parameters
+    ----------
+    x : array_like
+        Independent variable data.
+    a : float
+        Coefficient for the exponential function.
+    b : float
+        Exponential rate.
+    c : float
+        Offset value.
+
+    Returns
+    -------
+    array_like
+        The calculated dependent variable values.
+    """
+    return a * np.exp(b * x) + c
+
+
 def get_correction_coefficients(counts_per_50ms, relative_signal):
-    counts_per_50ms = [data[1] for data in counts_per_50ms]
-    # Define the model function based on the given equation
-    def model_func(x, a, b, c):
-        return c - a * np.exp(-b * x)
+    """
+    Calculate the correction coefficients for the dose rate dependency.
 
-    # Fit the model to the data
-    initial_guess = [0.035, 5.21e-5, 1.0]  # Initial guesses for a, b, and c
-    params, covariance = curve_fit(model_func, counts_per_50ms, relative_signal, p0=initial_guess)
+    Parameters
+    ----------
+    counts_per_50ms : list of tuple
+        List of tuples containing the file name and the average counts/50ms for each nominal dose rate.
+    relative_signal : array_like
+        Array of relative signal values corresponding to the nominal dose rates.
 
-    # Extract the fitted parameters
-    a_fit, b_fit, c_fit = params
-    return a_fit, b_fit, c_fit
+    Returns
+    -------
+    tuple of float
+        The fitted coefficients (a, b, c) for the exponential correction function.
+    """
+    counts_per_50ms = np.array([data[1] for data in counts_per_50ms])
+
+    # Perform the curve fitting
+    popt, _ = curve_fit(exponential_fit, counts_per_50ms, relative_signal)
+    return tuple(popt)
+
+
 def plot_correction_curve(counts_per_50ms, relative_signal, a_fit, b_fit, c_fit):
-    def model_func(x, a, b, c):
-        return c - a * np.exp(-b * x)
+    """
+    Plot the correction curve with the data points and the fitted exponential function.
 
-    # Extract only the numerical data from the tuples
-    counts_per_50ms = [data[1] for data in counts_per_50ms]
+    Parameters
+    ----------
+    counts_per_50ms : list of tuple
+        List of tuples containing the file name and the average counts/50ms for each nominal dose rate.
+    relative_signal : array_like
+        Array of relative signal values corresponding to the nominal dose rates.
+    a_fit : float
+        Fitted coefficient for the exponential function.
+    b_fit : float
+        Fitted exponential rate.
+    c_fit : float
+        Fitted offset value.
+    """
+    counts_per_50ms = np.array([data[1] for data in counts_per_50ms])
 
-    # # #Directly use saved values from the debugging session
-    # a_fit = 0.029895257663822866
-    # b_fit = 4.072015230665901e-05
-    # c_fit = 1.0011070715447767
-    # counts_per_50ms = [2317.7558333333336,
-    #                    4733.205000000001,
-    #                    9608.688333333334,
-    #                    19436.3675,
-    #                    39283.20500000001,
-    #                    39299.387500000004,
-    #                    80095.79083333332,
-    #                    80268.56916666665]
-    # relative_signal = [0.964,
-    #                    0.971,
-    #                    0.980,
-    #                    0.988,
-    #                    0.994,
-    #                    0.995,
-    #                    1.000,
-    #                    1.000]
-
-
-    # Generate x values for plotting the fitted curve
-    x_fit = np.linspace(0, max(counts_per_50ms), 1000)
-    y_fit = model_func(x_fit, a_fit, b_fit, c_fit)
+    # Generate fitted curve data points
+    x_fit = np.linspace(counts_per_50ms.min(), counts_per_50ms.max(), 500)
+    y_fit = exponential_fit(x_fit, a_fit, b_fit, c_fit)
 
     # Set Seaborn style
     sns.set(style="whitegrid")
@@ -103,12 +148,13 @@ def plot_correction_curve(counts_per_50ms, relative_signal, a_fit, b_fit, c_fit)
     sns.lineplot(x=x_fit, y=y_fit, label=f'Exponential fit, a={a_fit:.4f}, b={b_fit:.2e}, c={c_fit:.3f}')
     sns.scatterplot(x=counts_per_50ms, y=relative_signal, label='Data points')
 
-    plt.ioff() # Turn off interactive mode
+    plt.ioff()  # Turn off interactive mode
 
     # Plot the data points and the fitted curve
     plt.figure(figsize=(8, 6))
     plt.plot(x_fit, y_fit, label=f'Exponential fit, a={a_fit:.4f}, b={b_fit:.2e}, c={c_fit:.3f}')
-    plt.errorbar(counts_per_50ms, relative_signal, yerr=0.01, fmt='o', label='Data points')  # Assuming 1% error for demonstration
+    plt.errorbar(counts_per_50ms, relative_signal, yerr=0.01, fmt='o',
+                 label='Data points')  # Assuming 1% error for demonstration
 
     # Customize plot
     plt.xlabel('Counts/50ms')
@@ -119,8 +165,16 @@ def plot_correction_curve(counts_per_50ms, relative_signal, a_fit, b_fit, c_fit)
 
     plt.show()
 
+
 def plot_counts_per_50ms(counts_per_50ms):
-    # Extract only the numerical data from the tuples
+    """
+    Plot the counts per 50ms at different nominal dose rates.
+
+    Parameters
+    ----------
+    counts_per_50ms : list of tuple
+        List of tuples containing the file name and the average counts/50ms for each nominal dose rate.
+    """
     counts_per_50ms = [data[1] for data in counts_per_50ms]
 
     # Set Seaborn style
@@ -139,13 +193,18 @@ def plot_counts_per_50ms(counts_per_50ms):
 
     plt.show()
 
+
 def main():
+    """
+    Main function to execute the correction coefficient calculations and plotting.
+    """
     pr_measurement_folder = r"P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\NRO PR Coefficient"
     counts_per_50ms = get_pr_data_from_acm_files(pr_measurement_folder)
     plot_counts_per_50ms(counts_per_50ms)
     relative_signal = np.array([0.964, 0.971, 0.980, 0.988, 0.994, 0.995, 1.000, 1.000])
     a_fit, b_fit, c_fit = get_correction_coefficients(counts_per_50ms, relative_signal)
     plot_correction_curve(counts_per_50ms, relative_signal, a_fit, b_fit, c_fit)
+
 
 if __name__ == "__main__":
     main()

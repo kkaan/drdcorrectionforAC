@@ -1,3 +1,17 @@
+"""
+This module, `corrections.py`, contains functions for applying various corrections to ArcCheck measurements.
+
+The module includes the following functions:
+
+- `get_intrinsic_corrections`: Calculates the Intrinsic Correction array as an element-wise division of Corrected Counts by Raw Counts.
+- `apply_jager_corrections`: Applies Jager pulse rate and dose per pulse corrections to the accumulated count values.
+- `pulse_rate_correction`: Corrects the count values using the Jager pulse rate correction coefficients.
+- `dose_per_pulse_correction`: Corrects the count values using the Jager dose per pulse correction coefficients.
+
+This module is part of a larger project aimed at analyzing and correcting dose rate dependencies in ArcCheck measurements.
+
+"""
+
 import numpy as np
 import pandas as pd
 import io_snc
