@@ -1,3 +1,19 @@
+"""
+This module, `io_snc.py`, contains functions for handling input and output operations related to ArcCheck files.
+
+The module includes the following functions:
+
+- `parse_arccheck_header`: Parses the header information from an ArcCheck file and returns it as a dictionary.
+- `parse_arrays_from_file`: Parses the array data from an ArcCheck file and returns it as a dictionary.
+- `write_snc_txt_file`: Writes the array data and header into a .txt file in the same format as it was read.
+- `parse_acm_file`: Parses an ACM file and returns the frame data, diode data, and background and calibration data.
+- `detector_arrays`: Rearranges the detector data from acl file into the one displayed in SNC Patient.
+- `diode_numbers_in_snc_array`: Reorganizes the detectors numbers in an acl measurement file into the planar array that is displayed in SNC Patient software.
+
+This module is part of a larger project aimed at analyzing and correcting dose rate dependencies in ArcCheck measurements.
+
+"""
+
 import numpy as np
 import os
 import pandas as pd
