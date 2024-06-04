@@ -1,13 +1,13 @@
-# Description:  This script reads a detector file and returns the data, background, and calibration factor.
-#               It also rearranges the detector data from the acl file into the one displayed in SNC Patient.
-#               The detector data is then saved as a .npz file.
-# NOTE: Currently only takes in pre-formatted interim tab delimited file.
-
 import numpy as np
 import os
 import pandas as pd
 
 def parse_arccheck_header(file_path):
+    """""
+    Parses the header information from an ArcCheck file and returns it as a dictionary.
+    
+    
+    """""
     if not os.path.exists(file_path):
         print(f"Error: The file {file_path} does not exist.")
         return None
