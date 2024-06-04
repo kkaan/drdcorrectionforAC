@@ -4,11 +4,32 @@ import pandas as pd
 
 
 def parse_arccheck_header(file_path):
-    """""
+    """
     Parses the header information from an ArcCheck file and returns it as a dictionary.
 
+    Parameters
+    ----------
+    file_path : str
+        The path to the ArcCheck file.
 
-    """""
+    Returns
+    -------
+    dict or None
+        A dictionary containing the header information if the file exists and can be read successfully.
+        Returns None if the file does not exist or an error occurs during reading.
+
+    Raises
+    ------
+    Exception
+        If an error occurs during file reading.
+
+    Notes
+    -----
+    The function reads the file line by line and splits each line at the colon character to separate keys and values.
+    The keys are predefined in the `header_keys` dictionary. If a key from the file matches a key in `header_keys`,
+    the corresponding value is updated in the dictionary. The function also captures the full header text.
+
+    """
     if not os.path.exists(file_path):
         print(f"Error: The file {file_path} does not exist.")
         return None
@@ -58,6 +79,25 @@ def parse_arccheck_header(file_path):
 
 
 def parse_arrays_from_file(file_path):
+    """
+    Parses the array data from an ArcCheck file and returns it as a dictionary.
+
+    Parameters
+    ----------
+    file_path : str
+        The path to the ArcCheck file.
+
+    Returns
+    -------
+    dict
+        A dictionary containing the array data if the file exists and can be read successfully.
+
+    Notes
+    -----
+    The function reads the file line by line and splits each line at the space character to separate keys and values.
+    The keys are predefined in the `valid_arrays` list. If a key from the file matches a key in `valid_arrays`,
+    the corresponding value is updated in the dictionary.
+    """
     array_data = {}
     current_array = None
     array_content = []
@@ -99,12 +139,20 @@ def parse_arrays_from_file(file_path):
 def write_snc_txt_file(array_data, header_data, file_path):
     """
     Writes the array data and header into a .txt file in the same format as it was read.
-    Omits None values and uses tabs instead of spaces between array values.
 
-    Parameters:
-    - array_data (dict): Dictionary containing all the array data.
-    - header_data (dict): Dictionary containing all the header information, including 'Full Header Text'.
-    - file_path (str): Path to the file where the data should be saved.
+    Parameters
+    ----------
+    array_data : dict
+        Dictionary containing all the array data.
+    header_data : dict
+        Dictionary containing all the header information, including 'Full Header Text'.
+    file_path : str
+        Path to the file where the data should be saved.
+
+    Notes
+    -----
+    The function writes the full header text directly from the header_data dictionary.
+    Then it writes each array, skipping None values and using tabs as delimiter.
     """
     try:
         with open(file_path, 'w') as file:
@@ -130,6 +178,23 @@ def write_snc_txt_file(array_data, header_data, file_path):
 
 
 def parse_acm_file(file_path):
+    """
+    Parses an ACM file and returns the frame data, diode data, and background and calibration data.
+
+    Parameters
+    ----------
+    file_path : str
+        The path to the ACM file.
+
+    Returns
+    -------
+    tuple
+        A tuple containing three pandas DataFrames: frame_data_df, diode_data_df, bkrnd_and_calibration_df.
+
+    Notes
+    -----
+    The function reads the file line by line and splits each line at the tab character to separate keys and values.
+    """
     frame_data_keys = [
         'UPDATE#', 'TIMETIC1', 'TIMETIC2', 'PULSES',
         'STATUS1', 'STATUS2', 'VirtualInclinometer', 'CorrectedAngle', 'FieldSize', 'Reference Diode'
@@ -183,11 +248,19 @@ def detector_arrays(acl_detectors):
     """
     Rearranges the detector data from acl file into the one displayed in SNC Patient.
 
-    Parameters:
-    acl_detectors (DataFrame): The measurement data arranged in acl formal.
+    Parameters
+    ----------
+    acl_detectors : pandas.DataFrame
+        The measurement data arranged in acl formal.
 
-    Returns:
-    arrays (ndarray): A 3D numpy array created from the differential dose data.
+    Returns
+    -------
+    numpy.ndarray
+        A 3D numpy array created from the differential dose data.
+
+    Notes
+    -----
+    The function initializes a 3D numpy array with zeros and fills it with the detector data.
     """
     # Initialize a 3D numpy array with zeros
     arrays = np.zeros((len(acl_detectors), 41, 131))
@@ -216,11 +289,14 @@ def diode_numbers_in_snc_array():
     Reorganizes the detectors numbers in an acl measurement file into the planar array
     that is displayed in SNC Patient software.
 
-    Parameters:
-    acl_file (str): The path to the acl measurement file.
+    Returns
+    -------
+    numpy.ndarray
+        A 2D numpy array representing the reorganized detectors.
 
-    Returns:
-    array (ndarray): A 2D numpy array representing the reorganized detectors.
+    Notes
+    -----
+    The function creates an initial array of size 41x131 filled with zeros and fills every second row and column with detector numbers.
     """
     # Step 1: Read the acl file and extract the detector numbers
     # This step is dependent on the format of the acl file and is not shown here
@@ -242,4 +318,4 @@ def diode_numbers_in_snc_array():
     array = array.astype(int)
     return array
 
-# TODO: Add functionality to read in raw data from acl file and format it into the correct format.
+
