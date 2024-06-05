@@ -1,41 +1,70 @@
+"""This is the main module of the application. It contains the main function which processes ACM files and applies
+corrections.
+
+Functions:
+----------
+- apply_corrections: Applies corrections based on user input.
+- read_files: Reads and parses ACM and TXT files.
+- generate_plots: Generates plots and animations.
+- calculate_dose_values: Calculates dose values and dose rate values.
+- snc_format_array: Formats the array to be compatible with the SNC measured txt file.
+- get_user_input: Gets user input for batch folder path and correction type.
+- main: Main function to process ACM files and apply corrections.
+"""
+
 import os
 import numpy as np
 import io_snc
 import plots
 from corrections import apply_jager_corrections, get_intrinsic_corrections
 
+
 def apply_corrections(counts_accumulated_df, bkrnd_and_calibration_df, include_intrinsic_corrections, array_data):
     """
     Apply corrections based on user input.
 
-    Parameters:
-    counts_accumulated_df (DataFrame): DataFrame with accumulated counts.
-    bkrnd_and_calibration_df (DataFrame): DataFrame with background and calibration data.
-    include_intrinsic_corrections (str): Whether to include intrinsic corrections ('y' or 'n').
-    array_data (ndarray): Array data.
+    Parameters
+    ----------
+    counts_accumulated_df : pandas.DataFrame
+        DataFrame with accumulated counts.
+    bkrnd_and_calibration_df : pandas.DataFrame
+        DataFrame with background and calibration data.
+    include_intrinsic_corrections : str
+        Whether to include intrinsic corrections ('y' or 'n').
+    array_data : numpy.ndarray
+        Array data.
 
-    Returns:
-    ndarray: Corrected count array.
+    Returns
+    -------
+    numpy.ndarray
+        Corrected count array.
     """
     if include_intrinsic_corrections == 'y':
         intrinsic_corrections = get_intrinsic_corrections(array_data)
     else:
         intrinsic_corrections = None
 
-    corrected_count_array = apply_jager_corrections(counts_accumulated_df, bkrnd_and_calibration_df, intrinsic_corrections)
+    corrected_count_array = apply_jager_corrections(counts_accumulated_df, bkrnd_and_calibration_df,
+                                                    intrinsic_corrections)
 
     return corrected_count_array
+
 
 def read_files(acml_path, txt_path):
     """
     Read and parse ACM and TXT files.
 
-    Parameters:
-    acml_path (str): Path to the ACM file.
-    txt_path (str): Path to the TXT file.
+    Parameters
+    ----------
+    acml_path : str
+        Path to the ACM file.
+    txt_path : str
+        Path to the TXT file.
 
-    Returns:
-    tuple: DataFrames and arrays with parsed data.
+    Returns
+    -------
+    tuple
+        DataFrames and arrays with parsed data.
     """
     frame_data_df, counts_accumulated_df, bkrnd_and_calibration_df = io_snc.parse_acm_file(acml_path)
     header_data = io_snc.parse_arccheck_header(txt_path)
@@ -47,14 +76,22 @@ def generate_plots(dose_rate_arrays, dose_df, dose_rate_df, dose_accumulated_df,
     """
     Generate plots and animations.
 
-    Parameters:
-    dose_rate_arrays (ndarray): Dose rate arrays.
-    dose_df (DataFrame): DataFrame with dose data.
-    dose_rate_df (DataFrame): DataFrame with dose rate data.
-    dose_accumulated_df (DataFrame): DataFrame with accumulated dose data.
-    startframe (int): Starting frame.
-    endframe (int): Ending frame.
-    detector_number (int): Detector number.
+    Parameters
+    ----------
+    dose_rate_arrays : numpy.ndarray
+        Dose rate arrays.
+    dose_df : pandas.DataFrame
+        DataFrame with dose data.
+    dose_rate_df : pandas.DataFrame
+        DataFrame with dose rate data.
+    dose_accumulated_df : pandas.DataFrame
+        DataFrame with accumulated dose data.
+    startframe : int
+        Starting frame.
+    endframe : int
+        Ending frame.
+    detector_number : int
+        Detector number.
     """
     xn, yn = 31, 15
     diode_numbers_in_snc_array = io_snc.diode_numbers_in_snc_array()
@@ -86,13 +123,17 @@ def calculate_dose_values(counts_accumulated_df, dose_per_count):
     """
     Calculate dose values and dose rate values.
 
-    Parameters:
-    counts_accumulated_df (DataFrame): DataFrame with accumulated counts.
-    dose_per_count (float): Dose per count.
+    Parameters
+    ----------
+    counts_accumulated_df : pandas.DataFrame
+        DataFrame with accumulated counts.
+    dose_per_count : float
+        Dose per count.
 
-    Returns:
-    tuple: DataFrames with dose values and dose rate values.
-
+    Returns
+    -------
+    tuple
+        DataFrames with dose values and dose rate values.
     """
 
     dose_accumulated_df = counts_accumulated_df * dose_per_count  # cGy
@@ -113,16 +154,22 @@ def calculate_dose_values(counts_accumulated_df, dose_per_count):
 
     return dose_df, dose_accumulated_df, dose_rate_df, dose_rate_arrays
 
+
 def snc_format_array(corrected_count_array, formatted_counts):
     """
     Formats the array to be compatible with the SNC measured txt file.
 
-    Parameters:
-    corrected_count_array (numpy.ndarray): The array containing corrected dose values.
-    formatted_counts (numpy.ndarray): The array containing the counts with positional data directly from measured file.
+    Parameters
+    ----------
+    corrected_count_array : numpy.ndarray
+        The array containing corrected dose values.
+    formatted_counts : numpy.ndarray
+        The array containing the counts with positional data directly from measured file.
 
-    Returns:
-    numpy.ndarray: Corrected values in format ready for insertion into SNC txt file.
+    Returns
+    -------
+    numpy.ndarray
+        Corrected values in format ready for insertion into SNC txt file.
     """
     # Convert corrected_array values to strings with 16 digits
     corrected_array_str = np.array([["{:.15f}".format(value) for value in row] for row in corrected_count_array])
@@ -132,8 +179,16 @@ def snc_format_array(corrected_count_array, formatted_counts):
 
     return formatted_counts
 
+
 def get_user_input():
-    """Get user input for batch folder path and correction type."""
+    """
+    Get user input for batch folder path and correction type.
+
+    Returns
+    -------
+    tuple
+        Batch folder path and correction type.
+    """
     default_path = (r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on '
                     r'script\BatchrunMeasured')
     batch_folder_path = input(
@@ -148,6 +203,9 @@ def get_user_input():
 
 
 def main():
+    """
+    Main function to process ACM files and apply corrections.
+    """
     batch_folder_path, correction_type, include_intrinsic_corrections = get_user_input()
 
     for file in os.listdir(batch_folder_path):
@@ -196,6 +254,6 @@ def main():
             except Exception as e:
                 print(f"An error occurred while processing {file}: {str(e)}")
 
+
 if __name__ == "__main__":
     main()
-
