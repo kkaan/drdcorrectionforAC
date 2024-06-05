@@ -77,75 +77,139 @@
              
   <section id="module-main">
 <span id="main-module"></span><h1>main module<a class="headerlink" href="#module-main" title="Link to this heading"></a></h1>
+<p>This is the main module of the application. It contains the main function which processes ACM files and applies
+corrections.</p>
+<section id="functions">
+<h2>Functions:<a class="headerlink" href="#functions" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>apply_corrections: Applies corrections based on user input.</p></li>
+<li><p>read_files: Reads and parses ACM and TXT files.</p></li>
+<li><p>generate_plots: Generates plots and animations.</p></li>
+<li><p>calculate_dose_values: Calculates dose values and dose rate values.</p></li>
+<li><p>snc_format_array: Formats the array to be compatible with the SNC measured txt file.</p></li>
+<li><p>get_user_input: Gets user input for batch folder path and correction type.</p></li>
+<li><p>main: Main function to process ACM files and apply corrections.</p></li>
+</ul>
+</section>
 <dl class="py function">
 <dt class="sig sig-object py" id="main.apply_corrections">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">apply_corrections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">counts_accumulated_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bkrnd_and_calibration_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_intrinsic_corrections</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/main.html#apply_corrections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.apply_corrections" title="Link to this definition"></a></dt>
 <dd><p>Apply corrections based on user input.</p>
-<p>Parameters:
-counts_accumulated_df (DataFrame): DataFrame with accumulated counts.
-bkrnd_and_calibration_df (DataFrame): DataFrame with background and calibration data.
-include_intrinsic_corrections (str): Whether to include intrinsic corrections (‘y’ or ‘n’).
-array_data (ndarray): Array data.</p>
-<p>Returns:
-ndarray: Corrected count array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>counts_accumulated_df</strong> (<em>pandas.DataFrame</em>) – DataFrame with accumulated counts.</p></li>
+<li><p><strong>bkrnd_and_calibration_df</strong> (<em>pandas.DataFrame</em>) – DataFrame with background and calibration data.</p></li>
+<li><p><strong>include_intrinsic_corrections</strong> (<em>str</em>) – Whether to include intrinsic corrections (‘y’ or ‘n’).</p></li>
+<li><p><strong>array_data</strong> (<em>numpy.ndarray</em>) – Array data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Corrected count array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="main.calculate_dose_values">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">calculate_dose_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">counts_accumulated_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dose_per_count</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/main.html#calculate_dose_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.calculate_dose_values" title="Link to this definition"></a></dt>
 <dd><p>Calculate dose values and dose rate values.</p>
-<p>Parameters:
-counts_accumulated_df (DataFrame): DataFrame with accumulated counts.
-dose_per_count (float): Dose per count.</p>
-<p>Returns:
-tuple: DataFrames with dose values and dose rate values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>counts_accumulated_df</strong> (<em>pandas.DataFrame</em>) – DataFrame with accumulated counts.</p></li>
+<li><p><strong>dose_per_count</strong> (<em>float</em>) – Dose per count.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrames with dose values and dose rate values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="main.generate_plots">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">generate_plots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dose_rate_arrays</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dose_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dose_rate_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dose_accumulated_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector_number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/main.html#generate_plots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.generate_plots" title="Link to this definition"></a></dt>
 <dd><p>Generate plots and animations.</p>
-<p>Parameters:
-dose_rate_arrays (ndarray): Dose rate arrays.
-dose_df (DataFrame): DataFrame with dose data.
-dose_rate_df (DataFrame): DataFrame with dose rate data.
-dose_accumulated_df (DataFrame): DataFrame with accumulated dose data.
-startframe (int): Starting frame.
-endframe (int): Ending frame.
-detector_number (int): Detector number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dose_rate_arrays</strong> (<em>numpy.ndarray</em>) – Dose rate arrays.</p></li>
+<li><p><strong>dose_df</strong> (<em>pandas.DataFrame</em>) – DataFrame with dose data.</p></li>
+<li><p><strong>dose_rate_df</strong> (<em>pandas.DataFrame</em>) – DataFrame with dose rate data.</p></li>
+<li><p><strong>dose_accumulated_df</strong> (<em>pandas.DataFrame</em>) – DataFrame with accumulated dose data.</p></li>
+<li><p><strong>startframe</strong> (<em>int</em>) – Starting frame.</p></li>
+<li><p><strong>endframe</strong> (<em>int</em>) – Ending frame.</p></li>
+<li><p><strong>detector_number</strong> (<em>int</em>) – Detector number.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="main.get_user_input">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">get_user_input</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/main.html#get_user_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.get_user_input" title="Link to this definition"></a></dt>
 <dd><p>Get user input for batch folder path and correction type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Batch folder path and correction type.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="main.main">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/main.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.main" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Main function to process ACM files and apply corrections.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="main.read_files">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">read_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acml_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">txt_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/main.html#read_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.read_files" title="Link to this definition"></a></dt>
 <dd><p>Read and parse ACM and TXT files.</p>
-<p>Parameters:
-acml_path (str): Path to the ACM file.
-txt_path (str): Path to the TXT file.</p>
-<p>Returns:
-tuple: DataFrames and arrays with parsed data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>acml_path</strong> (<em>str</em>) – Path to the ACM file.</p></li>
+<li><p><strong>txt_path</strong> (<em>str</em>) – Path to the TXT file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrames and arrays with parsed data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="main.snc_format_array">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">snc_format_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">corrected_count_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">formatted_counts</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/main.html#snc_format_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.snc_format_array" title="Link to this definition"></a></dt>
 <dd><p>Formats the array to be compatible with the SNC measured txt file.</p>
-<p>Parameters:
-corrected_count_array (numpy.ndarray): The array containing corrected dose values.
-formatted_counts (numpy.ndarray): The array containing the counts with positional data directly from measured file.</p>
-<p>Returns:
-numpy.ndarray: Corrected values in format ready for insertion into SNC txt file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>corrected_count_array</strong> (<em>numpy.ndarray</em>) – The array containing corrected dose values.</p></li>
+<li><p><strong>formatted_counts</strong> (<em>numpy.ndarray</em>) – The array containing the counts with positional data directly from measured file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Corrected values in format ready for insertion into SNC txt file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

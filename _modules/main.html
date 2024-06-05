@@ -75,11 +75,26 @@
            <div itemprop="articleBody">
              
   <h1>Source code for main</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="sd">&quot;&quot;&quot;This is the main module of the application. It contains the main function which processes ACM files and applies</span>
+<span class="sd">corrections.</span>
+
+<span class="sd">Functions:</span>
+<span class="sd">----------</span>
+<span class="sd">- apply_corrections: Applies corrections based on user input.</span>
+<span class="sd">- read_files: Reads and parses ACM and TXT files.</span>
+<span class="sd">- generate_plots: Generates plots and animations.</span>
+<span class="sd">- calculate_dose_values: Calculates dose values and dose rate values.</span>
+<span class="sd">- snc_format_array: Formats the array to be compatible with the SNC measured txt file.</span>
+<span class="sd">- get_user_input: Gets user input for batch folder path and correction type.</span>
+<span class="sd">- main: Main function to process ACM files and apply corrections.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">io_snc</span>
 <span class="kn">import</span> <span class="nn">plots</span>
 <span class="kn">from</span> <span class="nn">corrections</span> <span class="kn">import</span> <span class="n">apply_jager_corrections</span><span class="p">,</span> <span class="n">get_intrinsic_corrections</span>
+
 
 <div class="viewcode-block" id="apply_corrections">
 <a class="viewcode-back" href="../source/main.html#main.apply_corrections">[docs]</a>
@@ -87,23 +102,32 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply corrections based on user input.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    counts_accumulated_df (DataFrame): DataFrame with accumulated counts.</span>
-<span class="sd">    bkrnd_and_calibration_df (DataFrame): DataFrame with background and calibration data.</span>
-<span class="sd">    include_intrinsic_corrections (str): Whether to include intrinsic corrections (&#39;y&#39; or &#39;n&#39;).</span>
-<span class="sd">    array_data (ndarray): Array data.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    counts_accumulated_df : pandas.DataFrame</span>
+<span class="sd">        DataFrame with accumulated counts.</span>
+<span class="sd">    bkrnd_and_calibration_df : pandas.DataFrame</span>
+<span class="sd">        DataFrame with background and calibration data.</span>
+<span class="sd">    include_intrinsic_corrections : str</span>
+<span class="sd">        Whether to include intrinsic corrections (&#39;y&#39; or &#39;n&#39;).</span>
+<span class="sd">    array_data : numpy.ndarray</span>
+<span class="sd">        Array data.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    ndarray: Corrected count array.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        Corrected count array.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">include_intrinsic_corrections</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span>
         <span class="n">intrinsic_corrections</span> <span class="o">=</span> <span class="n">get_intrinsic_corrections</span><span class="p">(</span><span class="n">array_data</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">intrinsic_corrections</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="n">corrected_count_array</span> <span class="o">=</span> <span class="n">apply_jager_corrections</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span> <span class="n">intrinsic_corrections</span><span class="p">)</span>
+    <span class="n">corrected_count_array</span> <span class="o">=</span> <span class="n">apply_jager_corrections</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span>
+                                                    <span class="n">intrinsic_corrections</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">corrected_count_array</span></div>
+
 
 
 <div class="viewcode-block" id="read_files">
@@ -112,12 +136,17 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read and parse ACM and TXT files.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    acml_path (str): Path to the ACM file.</span>
-<span class="sd">    txt_path (str): Path to the TXT file.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    acml_path : str</span>
+<span class="sd">        Path to the ACM file.</span>
+<span class="sd">    txt_path : str</span>
+<span class="sd">        Path to the TXT file.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    tuple: DataFrames and arrays with parsed data.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple</span>
+<span class="sd">        DataFrames and arrays with parsed data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">frame_data_df</span><span class="p">,</span> <span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span> <span class="o">=</span> <span class="n">io_snc</span><span class="o">.</span><span class="n">parse_acm_file</span><span class="p">(</span><span class="n">acml_path</span><span class="p">)</span>
     <span class="n">header_data</span> <span class="o">=</span> <span class="n">io_snc</span><span class="o">.</span><span class="n">parse_arccheck_header</span><span class="p">(</span><span class="n">txt_path</span><span class="p">)</span>
@@ -132,14 +161,22 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate plots and animations.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    dose_rate_arrays (ndarray): Dose rate arrays.</span>
-<span class="sd">    dose_df (DataFrame): DataFrame with dose data.</span>
-<span class="sd">    dose_rate_df (DataFrame): DataFrame with dose rate data.</span>
-<span class="sd">    dose_accumulated_df (DataFrame): DataFrame with accumulated dose data.</span>
-<span class="sd">    startframe (int): Starting frame.</span>
-<span class="sd">    endframe (int): Ending frame.</span>
-<span class="sd">    detector_number (int): Detector number.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dose_rate_arrays : numpy.ndarray</span>
+<span class="sd">        Dose rate arrays.</span>
+<span class="sd">    dose_df : pandas.DataFrame</span>
+<span class="sd">        DataFrame with dose data.</span>
+<span class="sd">    dose_rate_df : pandas.DataFrame</span>
+<span class="sd">        DataFrame with dose rate data.</span>
+<span class="sd">    dose_accumulated_df : pandas.DataFrame</span>
+<span class="sd">        DataFrame with accumulated dose data.</span>
+<span class="sd">    startframe : int</span>
+<span class="sd">        Starting frame.</span>
+<span class="sd">    endframe : int</span>
+<span class="sd">        Ending frame.</span>
+<span class="sd">    detector_number : int</span>
+<span class="sd">        Detector number.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">xn</span><span class="p">,</span> <span class="n">yn</span> <span class="o">=</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">15</span>
     <span class="n">diode_numbers_in_snc_array</span> <span class="o">=</span> <span class="n">io_snc</span><span class="o">.</span><span class="n">diode_numbers_in_snc_array</span><span class="p">()</span>
@@ -174,13 +211,17 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate dose values and dose rate values.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    counts_accumulated_df (DataFrame): DataFrame with accumulated counts.</span>
-<span class="sd">    dose_per_count (float): Dose per count.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    counts_accumulated_df : pandas.DataFrame</span>
+<span class="sd">        DataFrame with accumulated counts.</span>
+<span class="sd">    dose_per_count : float</span>
+<span class="sd">        Dose per count.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    tuple: DataFrames with dose values and dose rate values.</span>
-
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple</span>
+<span class="sd">        DataFrames with dose values and dose rate values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">dose_accumulated_df</span> <span class="o">=</span> <span class="n">counts_accumulated_df</span> <span class="o">*</span> <span class="n">dose_per_count</span>  <span class="c1"># cGy</span>
@@ -202,18 +243,24 @@
     <span class="k">return</span> <span class="n">dose_df</span><span class="p">,</span> <span class="n">dose_accumulated_df</span><span class="p">,</span> <span class="n">dose_rate_df</span><span class="p">,</span> <span class="n">dose_rate_arrays</span></div>
 
 
+
 <div class="viewcode-block" id="snc_format_array">
 <a class="viewcode-back" href="../source/main.html#main.snc_format_array">[docs]</a>
 <span class="k">def</span> <span class="nf">snc_format_array</span><span class="p">(</span><span class="n">corrected_count_array</span><span class="p">,</span> <span class="n">formatted_counts</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Formats the array to be compatible with the SNC measured txt file.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    corrected_count_array (numpy.ndarray): The array containing corrected dose values.</span>
-<span class="sd">    formatted_counts (numpy.ndarray): The array containing the counts with positional data directly from measured file.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    corrected_count_array : numpy.ndarray</span>
+<span class="sd">        The array containing corrected dose values.</span>
+<span class="sd">    formatted_counts : numpy.ndarray</span>
+<span class="sd">        The array containing the counts with positional data directly from measured file.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    numpy.ndarray: Corrected values in format ready for insertion into SNC txt file.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        Corrected values in format ready for insertion into SNC txt file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Convert corrected_array values to strings with 16 digits</span>
     <span class="n">corrected_array_str</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="s2">&quot;</span><span class="si">{:.15f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">row</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">corrected_count_array</span><span class="p">])</span>
@@ -224,10 +271,18 @@
     <span class="k">return</span> <span class="n">formatted_counts</span></div>
 
 
+
 <div class="viewcode-block" id="get_user_input">
 <a class="viewcode-back" href="../source/main.html#main.get_user_input">[docs]</a>
 <span class="k">def</span> <span class="nf">get_user_input</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get user input for batch folder path and correction type.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get user input for batch folder path and correction type.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple</span>
+<span class="sd">        Batch folder path and correction type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">default_path</span> <span class="o">=</span> <span class="p">(</span><span class="sa">r</span><span class="s1">&#39;P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on &#39;</span>
                     <span class="sa">r</span><span class="s1">&#39;script\BatchrunMeasured&#39;</span><span class="p">)</span>
     <span class="n">batch_folder_path</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span>
@@ -245,6 +300,9 @@
 <div class="viewcode-block" id="main">
 <a class="viewcode-back" href="../source/main.html#main.main">[docs]</a>
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Main function to process ACM files and apply corrections.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">batch_folder_path</span><span class="p">,</span> <span class="n">correction_type</span><span class="p">,</span> <span class="n">include_intrinsic_corrections</span> <span class="o">=</span> <span class="n">get_user_input</span><span class="p">()</span>
 
     <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">batch_folder_path</span><span class="p">):</span>
@@ -294,9 +352,9 @@
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;An error occurred while processing </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
+
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>
-
 </pre></div>
 
            </div>
