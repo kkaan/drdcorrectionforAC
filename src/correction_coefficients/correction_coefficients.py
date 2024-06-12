@@ -17,11 +17,14 @@ This module is part of a larger project aimed at analyzing and correcting dose r
 import os
 import sys
 
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import seaborn as sns
 from scipy.optimize import curve_fit
+import datetime
+
+
 
 # Add the src directory to the sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -76,7 +79,6 @@ def get_pr_data_from_acm_files(pr_measurement_folder):
         avg_count_rate = count_rate_df.mean().mean()
         counts_per_50ms_list.append((acm_file, avg_count_rate))
 
-
     # Convert the dictionary to a DataFrame
     counts_per_50ms_df = pd.DataFrame.from_dict(counts_per_50ms_dict, orient='index')
     # Save the DataFrame to a CSV file
@@ -127,11 +129,48 @@ def get_correction_coefficients(counts_per_50ms, relative_signal):
     """
     counts_per_50ms = np.array([data[1] for data in counts_per_50ms])
     initial_guess = [0.035, 5.21e-5, 1.0]
-    params, covariance =  curve_fit(saturation_func, counts_per_50ms,
-                                        relative_signal, p0=initial_guess)
+    # noinspection PyTupleAssignmentBalance
+    params, covariance = curve_fit(saturation_func, counts_per_50ms,
+                                   relative_signal, p0=initial_guess)
     a_fit, b_fit, c_fit = params
 
     return a_fit, b_fit, c_fit, covariance
+
+def get_coefficient_file_path(date=None):
+    """
+    Get the path to the file where the correction coefficients will be written.
+
+    Returns
+    -------
+    str
+        The file path for the correction coefficients.
+    """
+    # get user input on type of whether it DPP or PR
+    coefficient_file_directory = input("Enter the directory to the file where the correction coefficients will be written: ")
+
+    # Get the DRD type, ArcCheck SN from the user
+    DRD_type = input("Enter the DRD type: ")
+    ArcCheck_SN = input("Enter the ArcCheck SN: ")
+
+    # Get today's date
+    today = datetime.date.today()
+    date = today.strftime("%Y-%m-%d")
+
+    # construct coefficient file name from DRD type, ArcCheck SN and Date
+    coefficient_file_name = f"{DRD_type}_{ArcCheck_SN}_{date}.txt"
+
+    # construct the full path to the coefficient file
+    coefficient_file_path = os.path.join(coefficient_file_directory, coefficient_file_name)
+
+    return coefficient_file_path
+
+def write_correction_coefficients_to_file(coefficient_file_path, a_fit, b_fit, c_fit, covariance):
+    with open(coefficient_file_path, 'w') as f:
+        # Write the variable names and their values to the file
+        f.write(f"a_fit = {a_fit}\n")
+        f.write(f"b_fit = {b_fit}\n")
+        f.write(f"c_fit = {c_fit}\n")
+        f.write(f"covariance = {covariance}\n")
 
 
 def plot_correction_curve(counts_per_50ms, relative_signal, a_fit, b_fit, c_fit):
@@ -165,7 +204,7 @@ def plot_correction_curve(counts_per_50ms, relative_signal, a_fit, b_fit, c_fit)
     sns.lineplot(x=x_fit, y=y_fit, label=f'Exponential fit, a={a_fit:.4f}, b={b_fit:.2e}, c={c_fit:.3f}')
     sns.scatterplot(x=counts_per_50ms, y=relative_signal, label='Data points')
 
-    plt.ioff()  # Turn off interactive mode
+    #plt.ioff()  # Turn off interactive mode
 
     # Plot the data points and the fitted curve
     plt.figure(figsize=(8, 6))
@@ -196,7 +235,7 @@ def plot_counts_per_50ms(counts_per_50ms):
 
     # Set Seaborn style
     sns.set(style="whitegrid")
-    plt.ioff()  # Turn off interactive mode
+    #plt.ioff()  # Turn off interactive mode
     # Create a plot with Seaborn
     plt.figure(figsize=(10, 6))
     sns.scatterplot(x=range(len(counts_per_50ms)), y=counts_per_50ms, label='Counts/50ms')
@@ -208,20 +247,22 @@ def plot_counts_per_50ms(counts_per_50ms):
     plt.legend()
     plt.grid(True)
     plt.show()
-    plt.savefig('counts_per_50ms.png')
-
+    plt.savefig('counts_per_50ms_nominal.png')
 
 
 def main():
     """
     Main function to execute the correction coefficient calculations and plotting.
     """
+
     pr_measurement_folder = r"P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\NRO PR Coefficient"
     counts_per_50ms = get_pr_data_from_acm_files(pr_measurement_folder)
     # plot_counts_per_50ms(counts_per_50ms)
     relative_signal = np.array([0.964, 0.971, 0.980, 0.988, 0.994, 0.995, 1.000, 1.000])
-    a_fit, b_fit, c_fit, covariance  = get_correction_coefficients(counts_per_50ms, relative_signal)
-    plot_correction_curve(counts_per_50ms, relative_signal, a_fit, b_fit, c_fit)
+    a_fit, b_fit, c_fit, covariance = get_correction_coefficients(counts_per_50ms, relative_signal)
+    coefficient_file_path = get_coefficient_file_path()
+    write_correction_coefficients_to_file(coefficient_file_path, a_fit, b_fit, c_fit, covariance)
+    # plot_correction_curve(counts_per_50ms, relative_signal, a_fit, b_fit, c_fit)
 
 
 if __name__ == "__main__":

@@ -73,7 +73,9 @@ def get_intrinsic_corrections(array_data):
 
 def apply_jager_corrections(counts_accumulated_df, bkrnd_and_calibration_df, intrinsic_corrections=None):
     """Apply Jager pulse rate and dose per pulse corrections."""
-    a_pr, b_pr, c_pr = 0.035, 5.21 * 10 ** -5, 1
+
+    # a_pr, b_pr, c_pr = 0.035, 5.21 * 10 ** -5, 1 # Jager coefficients from paper
+    a_pr, b_pr, c_pr = 0.03921672747199777, 6.499040838838414e-055, 0.999142799734291 # Coefficients from NRO Measurements
     jager_pr_coefficients = np.array([a_pr, b_pr, c_pr])
 
     a_dpp, b_dpp, c_dpp = 0.0978, 3.33 * 10 ** -5, 1.011
