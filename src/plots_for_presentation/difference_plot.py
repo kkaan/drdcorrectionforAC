@@ -1,7 +1,7 @@
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-# Reduce the font size
+import matplotlib as mpl
 
 # Load data
 file_path = r'P:\02_QA Equipment\02_ArcCheck\05_Commissoning\03_NROAC\Dose Rate Dependence Fix\Test on script\ACResultsPowerQuerySummary.txt'
@@ -52,12 +52,14 @@ sns.set(style="whitegrid")
 metrics = ['3%3mm', '2%3mm', '1%3mm']
 
 for i, metric in enumerate(metrics):
-    ax1 = axs[i]
+    # Create the plot for each metric
+    fig, ax1 = plt.subplots(figsize=(10, 8))
+    sns.set(style="whitegrid")
 
     # Plot the differences
     subset_df = melted_df[melted_df['Metric'] == metric]
     colors = subset_df['Difference'].apply(color_mapper)
-    sns.scatterplot(x=subset_df['Difference'], y=subset_df['Plan Name'], hue=colors, palette=['red', 'green'], legend=False, s=100, marker='o', ax=ax1)
+    sns.scatterplot(x=subset_df['Difference'], y=subset_df['Plan Name'], hue=colors, palette=['red', 'green'], legend=False, s=100, marker='^', ax=ax1)
 
     # Set the limits for the first x-axis and set label color to dark grey
     ax1.set_xlim([-10, 10])
@@ -83,16 +85,14 @@ for i, metric in enumerate(metrics):
 
     # Add labels and title
     ax1.set_ylabel('Plan Name')
-    ax1.set_title(metric, loc='left')  # Set title to just the metric and align left
+    ax1.set_title(f'PR {metric}metric', loc='left')  # Set title to just the metric and align left
     ax1.axvline(0, color='gray', linestyle='--')
 
-# Adjust the space between the plots
-plt.subplots_adjust(hspace=0.5)
+    plt.tight_layout()
+    plt.ioff()
+    plt.savefig(f'PR_{metric}_correction_plot.png', dpi=300)
 
-plt.tight_layout()
-plt.ioff()
-plt.savefig('pr_correction_plot.png', dpi=300)
-plt.show()
+
 
 
 # Load data for DPP correction
@@ -119,44 +119,49 @@ fig, axs = plt.subplots(3, 1, figsize=(10, 24))
 sns.set(style="whitegrid")
 
 for i, metric in enumerate(metrics):
-    ax1 = axs[i]
+    metrics = ['3%3mm', '2%3mm', '1%3mm']
 
-    # Plot the differences
-    subset_df = melted_dpp_df[melted_dpp_df['Metric'] == metric]
-    colors = subset_df['Difference'].apply(color_mapper)
-    sns.scatterplot(x=subset_df['Difference'], y=subset_df['Plan Name'], hue=colors, palette=['green', 'red'], legend=False, s=100, marker='o', ax=ax1)
+    for i, metric in enumerate(metrics):
+        # Create the plot for each metric
+        fig, ax1 = plt.subplots(figsize=(10, 8))
+        sns.set(style="whitegrid")
 
-    # Set the limits for the first x-axis and set label color to dark grey
-    ax1.set_xlim([-10, 10])
-    ax1.set_xlabel('Differences', color='darkgrey')
+        # Plot the differences
+        subset_df = melted_dpp_df[melted_df['Metric'] == metric]
+        colors = subset_df['Difference'].apply(color_mapper)
+        sns.scatterplot(x=subset_df['Difference'], y=subset_df['Plan Name'], hue=colors, palette=['red', 'green'],
+                        legend=False, s=100, marker='^', ax=ax1)
 
-    # Reduce the font size
-    mpl.rcParams.update({'font.size': 10})
+        # Set the limits for the first x-axis and set label color to dark grey
+        ax1.set_xlim([-10, 10])
+        ax1.set_xlabel('Differences', color='darkgrey')
 
-    # Create a second x-axis
-    ax2 = ax1.twiny()
+        # Reduce the font size
+        mpl.rcParams.update({'font.size': 10})
 
-    # Plot the original values
-    subset_df = original_melted[original_melted['Metric'] == metric]
-    sns.scatterplot(x=subset_df['Original'], y=subset_df['Plan Name'], color='darkgrey', legend=False, s=100, marker='o', alpha=0.5, ax=ax2)
+        # Create a second x-axis
+        ax2 = ax1.twiny()
 
-    # Plot the DPP values
-    subset_df = dpp_melted[dpp_melted['Metric'] == metric]
-    sns.scatterplot(x=subset_df['DPP'], y=subset_df['Plan Name'], color='darkblue', legend=False, s=100, marker='o', alpha=0.5, ax=ax2)
+        # Plot the original values
+        subset_df = original_melted[original_melted['Metric'] == metric]
+        sns.scatterplot(x=subset_df['Original'], y=subset_df['Plan Name'], color='darkgrey', legend=False, s=100,
+                        marker='o', alpha=0.5, ax=ax2)
 
-    # Set the limits for the second x-axis and set label color to dark grey
-    ax2.set_xlim([50, 110])
-    ax2.set_xlabel('Pass Rates', color='darkgrey')
+        # Plot the PR values
+        subset_df = dpp_melted[dpp_melted['Metric'] == metric]
+        sns.scatterplot(x=subset_df['DPP'], y=subset_df['Plan Name'], color='darkblue', legend=False, s=100, marker='o',
+                        alpha=0.5, ax=ax2)
 
-    # Add labels and title
-    ax1.set_ylabel('Plan Name')
-    ax1.set_title(metric, loc='left')  # Set title to just the metric and align left
-    ax1.axvline(0, color='gray', linestyle='--')
+        # Set the limits for the second x-axis and set label color to dark grey
+        ax2.set_xlim([50, 110])
+        ax2.set_xlabel('Pass Rates', color='darkgrey')
 
-# Adjust the space between the plots
-plt.subplots_adjust(hspace=0.5)
+        # Add labels and title
+        ax1.set_ylabel('Plan Name')
+        ax1.set_title(f'DPP {metric}', loc='left')  # Set title to just the metric and align left
+        ax1.axvline(0, color='gray', linestyle='--')
 
-plt.tight_layout()
-plt.ioff()
-plt.savefig('dpp_correction_plot.png', dpi=300)
-plt.show()
+        plt.tight_layout()
+        plt.ioff()
+        plt.savefig(f'DPP_{metric}_correction_plot.png', dpi=300)
+
