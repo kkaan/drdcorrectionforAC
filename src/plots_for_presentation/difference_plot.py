@@ -85,7 +85,7 @@ for i, metric in enumerate(metrics):
 
     # Add labels and title
     ax1.set_ylabel('Plan Name')
-    ax1.set_title(f'PR {metric}metric', loc='left')  # Set title to just the metric and align left
+    ax1.set_title(f'PR {metric}', loc='left')  # Set title to just the metric and align left
     ax1.axvline(0, color='gray', linestyle='--')
 
     plt.tight_layout()
@@ -129,7 +129,7 @@ for i, metric in enumerate(metrics):
         # Plot the differences
         subset_df = melted_dpp_df[melted_df['Metric'] == metric]
         colors = subset_df['Difference'].apply(color_mapper)
-        sns.scatterplot(x=subset_df['Difference'], y=subset_df['Plan Name'], hue=colors, palette=['red', 'green'],
+        sns.scatterplot(x=subset_df['Difference'], y=subset_df['Plan Name'], hue=colors, palette=['green', 'red'],
                         legend=False, s=100, marker='^', ax=ax1)
 
         # Set the limits for the first x-axis and set label color to dark grey
