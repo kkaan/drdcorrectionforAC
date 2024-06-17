@@ -41,6 +41,13 @@ for i, metric in enumerate(metrics):
     ax.set_ylabel('Plan Name')
     ax.set_title(f'DPP {metric}', loc='left')  # Set title to just the metric and align left
 
+    # Add legend
+    legend_labels = ['Original', 'DPP']
+    legend_colors = ['darkgrey', 'darkblue']
+    patches = [plt.plot([],[], marker="o", ms=10, ls="", mec=None, color=legend_colors[i],
+                label="{:s}".format(legend_labels[i]) )[0]  for i in range(len(legend_labels))]
+    ax.legend(handles=patches, bbox_to_anchor=(0, 0.5), loc='center left', ncol=1)
+
     plt.tight_layout()
     plt.savefig(f'DPP_{metric}_pass_rate_plot.png', dpi=300)
     plt.show()
