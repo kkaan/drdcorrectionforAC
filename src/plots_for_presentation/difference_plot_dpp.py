@@ -24,7 +24,8 @@ for i, metric in enumerate(metrics):
     # Create the plot for each metric
     fig, ax = plt.subplots(figsize=(10, 8))
     sns.set(style="whitegrid")
-
+    # Ensure grid is turned on
+    ax.grid(True)
     # Plot the original values
     subset_df = original_melted[original_melted['Metric'] == metric]
     sns.scatterplot(x=subset_df['Original'], y=subset_df['Plan Name'], color='darkgrey', legend=False, s=100, marker='o', alpha=0.5, ax=ax)
@@ -42,7 +43,7 @@ for i, metric in enumerate(metrics):
     ax.set_title(f'DPP {metric}', loc='left')  # Set title to just the metric and align left
 
     # Add legend
-    legend_labels = ['Original', 'DPP']
+    legend_labels = ['Original', 'DPP Corrected']
     legend_colors = ['darkgrey', 'darkblue']
     patches = [plt.plot([],[], marker="o", ms=10, ls="", mec=None, color=legend_colors[i],
                 label="{:s}".format(legend_labels[i]) )[0]  for i in range(len(legend_labels))]

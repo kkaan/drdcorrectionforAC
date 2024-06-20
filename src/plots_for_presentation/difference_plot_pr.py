@@ -31,7 +31,7 @@ for i, metric in enumerate(metrics):
 
     # Plot the PR values
     subset_df = pr_melted[pr_melted['Metric'] == metric]
-    sns.scatterplot(x=subset_df['PR'], y=subset_df['Plan Name'], color='darkblue', legend=False, s=100, marker='o', alpha=0.5, ax=ax)
+    sns.scatterplot(x=subset_df['PR'], y=subset_df['Plan Name'], color='green', legend=False, s=100, marker='o', alpha=0.5, ax=ax)
 
     # Set the limits for the x-axis and set label color to dark grey
     ax.set_xlim([50, 110])
@@ -40,6 +40,14 @@ for i, metric in enumerate(metrics):
     # Add labels and title
     ax.set_ylabel('Plan Name')
     ax.set_title(f'PR {metric}', loc='left')  # Set title to just the metric and align left
+
+    # Add legend
+    legend_labels = ['Original', 'PR Corrected']
+    legend_colors = ['darkgrey', 'green']
+    patches = [plt.plot([],[], marker="o", ms=10, ls="", mec=None, color=legend_colors[i],
+                label="{:s}".format(legend_labels[i]) )[0]  for i in range(len(legend_labels))]
+    ax.legend(handles=patches, bbox_to_anchor=(0, 0.5), loc='center left', ncol=1)
+
 
     plt.tight_layout()
     plt.savefig(f'PR_{metric}_pass_rate_plot.png', dpi=300)
