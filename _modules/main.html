@@ -1,22 +1,20 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>main &mdash; Dose Rate Dependency Correction for SNC ArcChecks 0.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=2709fde1"></script>
-        <script src="../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -89,16 +87,16 @@
 <span class="sd">- main: Main function to process ACM files and apply corrections.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">io_snc</span>
-<span class="kn">import</span> <span class="nn">plots</span>
-<span class="kn">from</span> <span class="nn">corrections</span> <span class="kn">import</span> <span class="n">apply_jager_corrections</span><span class="p">,</span> <span class="n">get_intrinsic_corrections</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io_snc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">plots</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">corrections</span><span class="w"> </span><span class="kn">import</span> <span class="n">apply_jager_corrections</span><span class="p">,</span> <span class="n">get_intrinsic_corrections</span>
 
 
 <div class="viewcode-block" id="apply_corrections">
 <a class="viewcode-back" href="../source/main.html#main.apply_corrections">[docs]</a>
-<span class="k">def</span> <span class="nf">apply_corrections</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span> <span class="n">include_intrinsic_corrections</span><span class="p">,</span> <span class="n">array_data</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_corrections</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">bkrnd_and_calibration_df</span><span class="p">,</span> <span class="n">include_intrinsic_corrections</span><span class="p">,</span> <span class="n">array_data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply corrections based on user input.</span>
 
@@ -132,7 +130,7 @@
 
 <div class="viewcode-block" id="read_files">
 <a class="viewcode-back" href="../source/main.html#main.read_files">[docs]</a>
-<span class="k">def</span> <span class="nf">read_files</span><span class="p">(</span><span class="n">acml_path</span><span class="p">,</span> <span class="n">txt_path</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_files</span><span class="p">(</span><span class="n">acml_path</span><span class="p">,</span> <span class="n">txt_path</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read and parse ACM and TXT files.</span>
 
@@ -157,7 +155,7 @@
 
 <div class="viewcode-block" id="generate_plots">
 <a class="viewcode-back" href="../source/main.html#main.generate_plots">[docs]</a>
-<span class="k">def</span> <span class="nf">generate_plots</span><span class="p">(</span><span class="n">dose_rate_arrays</span><span class="p">,</span> <span class="n">dose_df</span><span class="p">,</span> <span class="n">dose_rate_df</span><span class="p">,</span> <span class="n">dose_accumulated_df</span><span class="p">,</span> <span class="n">startframe</span><span class="p">,</span> <span class="n">endframe</span><span class="p">,</span> <span class="n">detector_number</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_plots</span><span class="p">(</span><span class="n">dose_rate_arrays</span><span class="p">,</span> <span class="n">dose_df</span><span class="p">,</span> <span class="n">dose_rate_df</span><span class="p">,</span> <span class="n">dose_accumulated_df</span><span class="p">,</span> <span class="n">startframe</span><span class="p">,</span> <span class="n">endframe</span><span class="p">,</span> <span class="n">detector_number</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate plots and animations.</span>
 
@@ -207,7 +205,7 @@
 
 <div class="viewcode-block" id="calculate_dose_values">
 <a class="viewcode-back" href="../source/main.html#main.calculate_dose_values">[docs]</a>
-<span class="k">def</span> <span class="nf">calculate_dose_values</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">dose_per_count</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_dose_values</span><span class="p">(</span><span class="n">counts_accumulated_df</span><span class="p">,</span> <span class="n">dose_per_count</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate dose values and dose rate values.</span>
 
@@ -246,7 +244,7 @@
 
 <div class="viewcode-block" id="snc_format_array">
 <a class="viewcode-back" href="../source/main.html#main.snc_format_array">[docs]</a>
-<span class="k">def</span> <span class="nf">snc_format_array</span><span class="p">(</span><span class="n">corrected_count_array</span><span class="p">,</span> <span class="n">formatted_counts</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">snc_format_array</span><span class="p">(</span><span class="n">corrected_count_array</span><span class="p">,</span> <span class="n">formatted_counts</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Formats the array to be compatible with the SNC measured txt file.</span>
 
@@ -274,7 +272,7 @@
 
 <div class="viewcode-block" id="get_user_input">
 <a class="viewcode-back" href="../source/main.html#main.get_user_input">[docs]</a>
-<span class="k">def</span> <span class="nf">get_user_input</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_user_input</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get user input for batch folder path and correction type.</span>
 
@@ -299,7 +297,7 @@
 
 <div class="viewcode-block" id="main">
 <a class="viewcode-back" href="../source/main.html#main.main">[docs]</a>
-<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Main function to process ACM files and apply corrections.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
